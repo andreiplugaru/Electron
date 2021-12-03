@@ -6,6 +6,7 @@
 #define MAX 100
 #define SIN(x) sin(x * 3.141592653589 / 180)
 #define COS(x) cos(x * 3.141592653589 / 180)
+#define SIZECOEFINITIAL 50
 using namespace sf;
 using namespace std;
 struct punct
@@ -20,65 +21,51 @@ struct linie
 };
 struct obiect
 {
-    VertexArray linii; // se pune .setPrimitiveType(Lines); 
-    VertexArray triunghiuri;
-    CircleShape cercuri;
-    RectangleShape chenar;
     float offsetX;
     float offsetY;
     punct mijloc;
     float unghiRotire;
-    float sizeCoef = 50;
+};
+struct elCircuit {
+    char denumire[30];
+    VertexArray linii;
+    CircleShape elipsa;
+    VertexArray arc;
+    RectangleShape patrat;
     unsigned nrLegaturi;
     unsigned nrLinii;
     float inaltime;
     float latime;
     punct legaturi[MAX];
+    float sizeCoef = 50;
+    RectangleShape chenar;
+};
+struct legatura
+{
+    Vector2f pPornire;
+    Vector2f pSfarsit;
 };
 enum statusuri{
     DesenareLinie,
     Normal
 };
-/*void rotire(VertexArray* linii, punct centru, int unghi)
-{
-   for(int i = 0; i < (*linii).getVertexCount(); i++)
-   {
-        // Shifting the pivot point to the origin
-        // and the given points accordingly
-        int x_shifted = (*linii)[i].position.x - centru.x;
-        int y_shifted = (*linii)[i].position.y - centru.y;
 
-        // Calculating the rotated point co-ordinates
-        // and shifting it back
-        (*linii)[i].position.x = centru.x
-            + (x_shifted * COS(unghi)
-                - y_shifted * SIN(unghi));
-
-        (*linii)[i].position.y = centru.y
-            + (x_shifted * SIN(unghi)
-                + y_shifted * COS(unghi));
-        i++;
-    }
-}
-*/
-obiect citireCoordonate(FILE* f)
+elCircuit citireCoordonate(FILE* f)
 {
-    obiect o1;
+    elCircuit o1;
     int i = 0, nr = 0;
+    char denumire[30];
+  //  string denumire;
     o1.linii.setPrimitiveType(Lines);
-    
+    fscanf(f, "%s", denumire);
     fscanf(f, "%d", &nr);
     for (int i = 0; i < nr; i++)
     {
-       /* fscanf(f, "%f", &o1.legaturi[i].x);
-        fscanf(f, "%f", &o1.legaturi[i].y);
-        */
         float v;
         fscanf(f, "%f", &v);
-        o1.legaturi[i].x = (v + 2)*o1.sizeCoef;
+        o1.legaturi[i].x = (v + 2) * SIZECOEFINITIAL;
         fscanf(f, "%f", &v);
-        o1.legaturi[i].y = (v + 1) * o1.sizeCoef;
-
+        o1.legaturi[i].y = (v + 1) * SIZECOEFINITIAL;
     }
     o1.nrLegaturi = nr;
   
@@ -88,43 +75,45 @@ obiect citireCoordonate(FILE* f)
     {
         Vertex punct;
 
-       /* fscanf(f, "%f", &punct.position.x);
-        fscanf(f, "%f", &punct.position.y);
-        o1.linii.append(punct);
-
-        fscanf(f, "%f", &punct.position.x);
-        fscanf(f, "%f", &punct.position.y);
-        */
         float v;
-        fscanf(f, "%f", &v);
-        punct.position.x = (v + 2) * o1.sizeCoef;
-        fscanf(f, "%f", &v);
-        punct.position.y = (v + 1) * o1.sizeCoef;
-        o1.linii.append(punct);
+        char tip;
+        fscanf(f, "\n%c", &tip);
 
-        fscanf(f, "%f", &v);
-        punct.position.x = (v + 2) * o1.sizeCoef;
-        fscanf(f, "%f", &v);
-        punct.position.y = (v + 1) * o1.sizeCoef;
-        o1.linii.append(punct);
-        if (i == 0)
+        if (tip == 'L')
         {
-            xmin = o1.linii[i * 2].position.x;
-            ymin = o1.linii[i * 2].position.y;
+            fscanf(f, "%f", &v);
+            punct.position.x = (v + 2) * SIZECOEFINITIAL;
+            fscanf(f, "%f", &v);
+            punct.position.y = (v + 1) * SIZECOEFINITIAL;
+            o1.linii.append(punct);
+
+            fscanf(f, "%f", &v);
+            punct.position.x = (v + 2) * SIZECOEFINITIAL;
+            fscanf(f, "%f", &v);
+            punct.position.y = (v + 1) * SIZECOEFINITIAL;
+            o1.linii.append(punct);
+            if (i == 0)
+            {
+                xmin = o1.linii[i * 2].position.x;
+                ymin = o1.linii[i * 2].position.y;
+            }
+
+            if (o1.linii[i * 2].position.x > xmax) xmax = o1.linii[i * 2].position.x;
+            if (o1.linii[i * 2 + 1].position.x > xmax) xmax = o1.linii[i * 2 + 1].position.x;
+
+            if (o1.linii[i * 2].position.x < xmin) xmin = o1.linii[i * 2 + 1].position.x;
+            if (o1.linii[i * 2 + 1].position.x < xmin) xmin = o1.linii[i * 2 + 1].position.x;
+
+            if (o1.linii[i * 2].position.y > ymax) ymax = o1.linii[i * 2].position.y;
+            if (o1.linii[i * 2 + 1].position.y > ymax) ymax = o1.linii[i * 2 + 1].position.y;
+
+            if (o1.linii[i * 2].position.y < ymin) ymin = o1.linii[i * 2].position.y;
+            if (o1.linii[i * 2 + 1].position.y < ymin) ymin = o1.linii[i * 2 + 1].position.y;
         }
 
-        if (o1.linii[i * 2].position.x > xmax) xmax = o1.linii[i * 2].position.x;
-        if (o1.linii[i * 2 + 1].position.x > xmax) xmax = o1.linii[i * 2 + 1].position.x;
-
-        if (o1.linii[i * 2].position.x < xmin) xmin = o1.linii[i * 2 + 1].position.x;
-        if (o1.linii[i * 2 + 1].position.x < xmin) xmin = o1.linii[i * 2 + 1].position.x;
-
-        if (o1.linii[i * 2].position.y > ymax) ymax = o1.linii[i * 2].position.y;
-        if (o1.linii[i * 2 + 1].position.y > ymax) ymax = o1.linii[i * 2 + 1].position.y;
-
-        if (o1.linii[i * 2].position.y < ymin) ymin = o1.linii[i * 2].position.y;
-        if (o1.linii[i * 2 + 1].position.y < ymin) ymin = o1.linii[i * 2 + 1].position.y;
     }
+    strcpy(o1.denumire, denumire);
+    
     o1.latime = xmax - xmin;
     o1.inaltime = ymax - ymin;
     o1.nrLinii = nr;
@@ -132,29 +121,30 @@ obiect citireCoordonate(FILE* f)
 
     return o1;
 }
-VertexArray creareConexiuni(Vector2i coordonateMouse, Vertex legatura)
+VertexArray creareConexiuni(legatura l)
 {
     VertexArray conexiuni(Lines);
-    float distanta = coordonateMouse.x - legatura.position.x;
+    float distanta = l.pSfarsit.x - l.pPornire.x;
 
     Vertex punct;
-
-    punct.position.x = legatura.position.x + distanta / 2;
-    punct.position.y = legatura.position.y;
+    
+    punct.position.x = l.pPornire.x + distanta / 2;
+    punct.position.y = l.pPornire.y;
     conexiuni.append(punct);
     conexiuni.append(punct);
 
-    punct.position.x = legatura.position.x + distanta / 2;
-    punct.position.y = coordonateMouse.y;
+    punct.position.x = l.pPornire.x + distanta / 2;
+    punct.position.y = l.pSfarsit.y;
     conexiuni.append(punct);
     conexiuni.append(punct);
 
-    punct.position.x = coordonateMouse.x;
-    punct.position.y = coordonateMouse.y;
+    punct.position.x = l.pSfarsit.x;
+    punct.position.y = l.pSfarsit.y;
     conexiuni.append(punct);
 
     return conexiuni;
 }
+
 void coordonateDupaRotire(RectangleShape patrat, punct* Min, punct* Max, Transform tp)
 {
  //   punct Min, Max;
@@ -242,15 +232,85 @@ bool singlePixelTest(const sf::RectangleShape Object1, sf::Vector2i mousePositio
     }
     return false;
 }
+VertexArray scalareLinii(VertexArray linii, float coef)
+{
+    VertexArray liniiModificate(Lines);
+    for (int i = 0; i < linii.getVertexCount(); i++)
+    {
+        Vertex mod;
+        mod.position.x = linii[i].position.x * coef;
+        mod.position.y = linii[i].position.y * coef;
+        liniiModificate.append(mod);
+    }
+    return liniiModificate;
+}
+void desenareMeniuElemente(RenderWindow& window, elCircuit elemente[], int nrElemente)
+{
+    Transform t;
+    float offsetY = 100;
+    float offsetX = 10;
+    t.translate(0, offsetY);
+    
+    float scale = 0.5;
+   
+ //  t.translate(47/2, 0);
+    float latimeCasuta = (1920 - (nrElemente + 1)*10) / nrElemente;
+    Vector2f dimCasuta;
+    dimCasuta.x = latimeCasuta;
+    dimCasuta.y = 50;
+    t.translate(-latimeCasuta + (latimeCasuta - elemente[0].latime * scale) / 2, 0);
+    for (int i = 0; i < nrElemente; i++)
+    {
+        RectangleShape casuta;
+        sf::Color albastru(0, 102, 204);
+        casuta.setPosition(latimeCasuta * i + 10*(i+1), 100);
+        //casuta.setPosition(500, 100);
+        casuta.setSize(dimCasuta);
+        casuta.setFillColor(albastru);
+      //  casuta.setOutlineThickness(5.f);
+     //   casuta.setOutlineColor(Color::Blue);
+        window.draw(casuta);
+        t.translate(offsetX + latimeCasuta,0);
+      //  t.translate(offsetX + latimeCasuta + 20, 0);
+        if (elemente[i].linii.getVertexCount() != 0)
+        {
+           window.draw(scalareLinii(elemente[i].linii, scale), t);
+        }
+        if (elemente[i].patrat.getPointCount() != 0)
+        {
+            window.draw(elemente[i].patrat, t);
+        }
+        if (elemente[i].arc.getVertexCount() != 0)
+        {
+            window.draw(elemente[i].arc, t);
+        }
+        if (elemente[i].elipsa.getPointCount() != 0)
+        {
+            window.draw(elemente[i].elipsa, t);
+        }
+      //  t.translate(47 / 2, 0);
+      //  t.translate(latimeCasuta, 0);
+
+      /*  VertexArray linieHotar(Lines);
+        Vertex p1, p2;
+        p1.position.x = 0;
+        p1.position.y = 0;
+        p1.color = Color::Green;
+        p2.position.x = 0;
+        p2.position.y = 50;
+        p2.color = Color::Green;
+        linieHotar.append(p1);
+        linieHotar.append(p2);
+        */
+    }
+}
 void afisareElement(FILE* f)
 {
     int i = 0;
- //   linie l[MAX];
-   // punct legaturi[MAX];
-  //  int nrLinii = 0, nrLegaturi = 0;
-    obiect Baterie =  citireCoordonate(f);
+    legatura l1;
+    elCircuit Baterie =  citireCoordonate(f);
 
-    RenderWindow window(VideoMode(600, 600), "SFML works!", Style::Fullscreen);
+    RenderWindow window(VideoMode(1920, 1080), "SFML works!");
     
     window.setFramerateLimit(60);
     
@@ -261,15 +321,7 @@ void afisareElement(FILE* f)
 
     float xmin = 300, xmax = -300, ymin = 300, ymax = -300;
     statusuri status = Normal;
-   /* for (int i = 0; i < nrLinii; i++)
-    {
-        lines.append(Vertex((Vector2f(l[i].p1.x, l[i].p1.y))));
-        lines.append(Vertex((Vector2f(l[i].p2.x, l[i].p2.y))));
-       
-
-    }*/
-   
-  //  RectangleShape Baterie.chenar;
+  
   
     Baterie.chenar.setFillColor(Color::Transparent);
     Baterie.chenar.setOutlineThickness(5.f);
@@ -283,18 +335,21 @@ void afisareElement(FILE* f)
   //  Baterie.chenar.setOrigin(origin);
    // tp.translate(200 , 200 );
     Vector2f size = Baterie.chenar.getSize();
-    size.x *= Baterie.sizeCoef;
-    size.y *= Baterie.sizeCoef;
-   // Baterie.chenar.setSize(size);
-   // tp.scale(Baterie.sizeCoef, Baterie.sizeCoef);
-  //  tp.translate(Baterie.latime / 2 * Baterie.sizeCoef, Baterie.inaltime / 2 * Baterie.sizeCoef);
-   // Baterie.chenar.setPosition(xmin * 50 + 200 + latime / 2, ymin * 50 + 200 + inaltime / 2);
- 
+    size.x *= SIZECOEFINITIAL;
+    size.y *= SIZECOEFINITIAL;
+  
     VertexArray linie(Lines);
     Vertex punctPornire;
-   // t.translate(200,200);
-   // t.scale(Baterie.sizeCoef, Baterie.sizeCoef);
-   // tm.scale(Baterie.sizeCoef, Baterie.sizeCoef);
+    elCircuit elemente[13];
+    for (int i = 0; i < 13; i++) elemente[i] = Baterie;
+    Transformable transformablet;
+    
+    transformablet.move(origin.x, 300 + origin.y);
+    transformablet.setOrigin(origin.x, origin.y);
+    tp.translate(0, 300);
+    tm.translate(0, 300);
+    VertexArray conexiuni(Lines);
+    bool areConexiuni = false;
     while (window.isOpen())
     {
         sf::Event event;
@@ -306,66 +361,114 @@ void afisareElement(FILE* f)
 
             case sf::Event::KeyPressed:
                 if (event.key.code == sf::Keyboard::Right) {
-                    t.translate(50, 0);
+                    transformablet.move(50, 0); 
                     tp.translate(50, 0);
-                    tm.translate(50, 0);
-                   
-                  //  Baterie.chenar.setOrigin(origin.x + 10, origin.y);
-                //   tp.translate(10, 0);
+                  //  Baterie.chenar.move(50, 0);
+                    Transform TransformPunctConexiune;
+                    TransformPunctConexiune.translate(50, 0);
+                    l1.pPornire = TransformPunctConexiune.transformPoint(l1.pPornire);
+                    if (areConexiuni)
+                    {
+                        conexiuni = creareConexiuni(l1);
+                        linie.clear();
+                        linie.append(l1.pPornire);
+                        for (int i = 0; i < conexiuni.getVertexCount(); i++)
+                        {
+                            linie.append(conexiuni[i]);
+                        }
+                    }
                 }
                 if (event.key.code == sf::Keyboard::Left) {
                     t.translate(-50, 0);
                     tp.translate(-50, 0);
-                    tm.translate(-50, 0);
-                    Vector2f origin = Baterie.chenar.getOrigin();
-                 //   Baterie.chenar.setOrigin(origin.x - 10, origin.y);
-                   // tp.translate(-10, 0);
-
-
+                    transformablet.move(-50, 0);
+                    Transform TransformPunctConexiune;
+                    TransformPunctConexiune.translate(-50, 0);
+                    l1.pPornire = TransformPunctConexiune.transformPoint(l1.pPornire);
+                    if (areConexiuni)
+                    {
+                        conexiuni = creareConexiuni(l1);
+                        linie.clear();
+                        linie.append(l1.pPornire);
+                        for (int i = 0; i < conexiuni.getVertexCount(); i++)
+                        {
+                            linie.append(conexiuni[i]);
+                        }
+                    }
                 }
                 else if (event.key.code == sf::Keyboard::Up) {
                     t.translate(0, -50);
                     tp.translate(0, -50);
-                    tm.translate(0, -50);
-                    Vector2f origin = Baterie.chenar.getOrigin();
-                   // Baterie.chenar.setOrigin(origin.x, origin.y - 10);
-                 //   tp.translate(0, -10);
-
+                //    tm.translate(0, -50);
+                    transformablet.move(0, -50);
+                    if (areConexiuni)
+                    {
+                        l1.pPornire.y -= 50;
+                        conexiuni = creareConexiuni(l1);
+                        linie.clear();
+                        linie.append(l1.pPornire);
+                        for (int i = 0; i < conexiuni.getVertexCount(); i++)
+                        {
+                            linie.append(conexiuni[i]);
+                        }
+                    }
                 }
                 else if (event.key.code == sf::Keyboard::Down) {
                     t.translate(0, 50);
                     tp.translate(0, 50);
-                    tm.translate(0, 50);
-                    Vector2f origin = Baterie.chenar.getOrigin();
-                
+                 //   tm.translate(0, 50);
+                    transformablet.move(0, 50);
+                    if (areConexiuni)
+                    {
+                        l1.pPornire.y += 50;
+                        conexiuni = creareConexiuni(l1);
+                        linie.clear();
+                        linie.append(l1.pPornire);
+                        for (int i = 0; i < conexiuni.getVertexCount(); i++)
+                        {
+                            linie.append(conexiuni[i]);
+                        }
+                    }
                 }
                 else if (event.key.code == sf::Keyboard::R) {
-                    
-                   // FloatRect dimBaterie.chenar = Baterie.chenar.getGlobalBounds();
-              //      dimBaterie.chenar = tp.transformRect(dimBaterie.chenar);
-                //    Baterie.chenar.
-                   // cout << dimBaterie.chenar.top;
-                  //  punct max, min;
-                //    coordonateDupaRotire(Baterie.chenar, &min, &max, tp);
-
-                    t.rotate(10,origin.x, origin.y);
+                    //t.rotate(10,origin.x, origin.y);
+                    transformablet.rotate(10);
                     tp.rotate(10, origin);
-                    tm.rotate(10);
-                   // tp.rotate(10, (max.x - min.x) / 2, (max.y - min.y) / 2);
-                   /* punct centru;
-                    centru.x = xmin * 50 + 200 + latime / 2;
-                    centru.y = ymin * 50 + 200 + inaltime / 2;
-                    //rotire(&lines, centru, 10);*/
+                    tm.rotate(10, origin);
+                    Transform TransformPunctConexiune;
+                    TransformPunctConexiune.rotate(10, tp.transformPoint(origin));
+                    l1.pPornire = TransformPunctConexiune.transformPoint(l1.pPornire);
+                    if (areConexiuni)
+                    {
+                        conexiuni = creareConexiuni(l1);
+                        linie.clear();
+                        linie.append(l1.pPornire);
+                        for (int i = 0; i < conexiuni.getVertexCount(); i++)
+                        {
+                            linie.append(conexiuni[i]);
+                        }
+                    }
                 }
                 else if (event.key.code == sf::Keyboard::M) {
                     Vector2f size = Baterie.chenar.getSize();
                     size.x *= 0.5;
                     size.y *= 0.4;
-                  // Baterie.chenar.setSize(size);
-                    //Baterie.chenar.scale(0.5, 0.5, origin.x, origin.y);
                     tp.scale(0.5, 0.5, origin.x, origin.y);
                     t.scale(0.5,0.5,origin.x, origin.y);
-                    
+                    transformablet.scale(0.5, 0.5);
+                    Transform TransformPunctConexiune;
+                    TransformPunctConexiune.scale(0.5, 0.5, tp.transformPoint(origin).x, tp.transformPoint(origin).y);
+                    l1.pPornire = TransformPunctConexiune.transformPoint(l1.pPornire);
+                    if (areConexiuni)
+                    {
+                        conexiuni = creareConexiuni(l1);
+                        linie.clear();
+                        linie.append(l1.pPornire);
+                        for (int i = 0; i < conexiuni.getVertexCount(); i++)
+                        {
+                            linie.append(conexiuni[i]);
+                        }
+                    }
                 }
                 else if (event.key.code == sf::Keyboard::E) {
                     window.close();
@@ -377,14 +480,9 @@ void afisareElement(FILE* f)
                 Vector2i coordonateMouse = Mouse::getPosition(window);
                 if (status != DesenareLinie)
                 {
-                   // FloatRect Baterie.chenarBounds = coveringRect(Baterie.chenar, tp);
-                    //    Baterie.chenar.getRotation()
-                  
-
                     punct max, min;
-                    coordonateDupaRotire(Baterie.chenar, &min, &max, tp);
-                    //  Vector2f punctRotire = tm.transformPoint((Vector2f)coordonateMouse);
-                    cout << "Mouse";
+                    coordonateDupaRotire(Baterie.chenar, &min, &max, transformablet.getTransform());
+
                     if (coordonateMouse.x >= min.x && coordonateMouse.y >= min.y
                         && coordonateMouse.x <= max.x && coordonateMouse.y <= max.y)
                     {
@@ -395,9 +493,11 @@ void afisareElement(FILE* f)
                 }
                 else
                 {
-                    VertexArray conexiuni = creareConexiuni(coordonateMouse, linie[0]);
+                    l1.pSfarsit.x = coordonateMouse.x;
+                    l1.pSfarsit.y = coordonateMouse.y;
+                    conexiuni = creareConexiuni(l1);
                     linie.clear();
-                    linie.append(punctPornire);
+                    linie.append(l1.pPornire);
                     for (int i = 0; i < conexiuni.getVertexCount(); i++)
                     {
                         linie.append(conexiuni[i]);
@@ -414,14 +514,15 @@ void afisareElement(FILE* f)
                     linie.clear();
                     for (int i = 0; i < Baterie.nrLegaturi; i++)
                     {
-                        Vertex punctTransfomrat = t.transformPoint(Baterie.legaturi[i].x , Baterie.legaturi[i].y);
+                        Vertex punctTransfomrat = transformablet.getTransform().transformPoint(Baterie.legaturi[i].x, Baterie.legaturi[i].y);
 
-                        if (abs(punctTransfomrat.position.x- coordonateMouse.x) < 25 && abs(punctTransfomrat.position.y- coordonateMouse.y) < 25)
+                        if (abs(punctTransfomrat.position.x - coordonateMouse.x) < 30 && abs(punctTransfomrat.position.y - coordonateMouse.y) < 30)
                         {
+                            l1.pPornire.x = punctTransfomrat.position.x;
+                            l1.pPornire.y = punctTransfomrat.position.y;
                             status = DesenareLinie;
-                            punctPornire.position.x = punctTransfomrat.position.x;
-                            punctPornire.position.y = punctTransfomrat.position.y;
-                            linie.append(punctPornire);
+                            
+                            areConexiuni = true;
                         }
                     }
                 }
@@ -437,10 +538,15 @@ void afisareElement(FILE* f)
         }
 
         window.clear();
-        window.draw(linie, tm);
-        window.draw(Baterie.linii, t);
+        //for i = 0 to n
+        Transform transformElBara;
+        transformElBara.translate(0, 50);
+       
+        desenareMeniuElemente(window, elemente, 12);
+        window.draw(linie);
+        window.draw(Baterie.linii, transformablet.getTransform());
         
-        window.draw(Baterie.chenar,tp);
+        window.draw(Baterie.chenar, transformablet.getTransform());
         //window.draw(line2, 2, Lines,t);
 
         window.display();
@@ -448,9 +554,11 @@ void afisareElement(FILE* f)
     fclose(f);
 
 }
+
 int main()
 {
     FILE* f = fopen("BATERIE.PS", "r");
+   
     afisareElement(f);
     return 0;
 }

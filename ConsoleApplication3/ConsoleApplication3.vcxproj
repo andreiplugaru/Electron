@@ -159,6 +159,9 @@
     <None Include="sfml-window-2.dll" />
     <None Include="sfml-window-d-2.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Conexiuni.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

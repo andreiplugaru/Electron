@@ -7,6 +7,7 @@
 #define SIN(x) sin(x * 3.141592653589 / 180)
 #define COS(x) cos(x * 3.141592653589 / 180)
 #define SIZECOEFINITIAL 50
+#define NULLVECTOR Vector2f x = NAN, y = NAN
 using namespace sf;
 using namespace std;
 struct punct
@@ -19,12 +20,17 @@ struct linie
     punct p1;
     punct p2;
 };
-struct obiect
+struct Componenta
 {
     float offsetX;
     float offsetY;
-    punct mijloc;
+    Vector2f origine;
     float unghiRotire;
+    bool areConexiuni[MAX] = { false };
+    int conexiuneActiva;
+    Vertex conexiuni[MAX];
+    VertexArray liniiPtConexiuni[MAX];
+    Transformable transformari;
 };
 struct elCircuit {
     char denumire[30];
@@ -36,11 +42,11 @@ struct elCircuit {
     unsigned nrLinii;
     float inaltime;
     float latime;
-    punct legaturi[MAX];
+    Vector2f legaturi[MAX];
     float sizeCoef = 50;
     RectangleShape chenar;
 };
-struct legatura
+struct Legatura
 {
     Vector2f pPornire;
     Vector2f pSfarsit;
@@ -55,7 +61,7 @@ elCircuit citireCoordonate(FILE* f)
     elCircuit o1;
     int i = 0, nr = 0;
     char denumire[30];
-  //  string denumire;
+    //string denumire;
     o1.linii.setPrimitiveType(Lines);
     fscanf(f, "%s", denumire);
     fscanf(f, "%d", &nr);
@@ -121,45 +127,59 @@ elCircuit citireCoordonate(FILE* f)
 
     return o1;
 }
-VertexArray creareConexiuni(legatura l)
+VertexArray creareConexiuni(Vector2f coordMouse, Vertex PunctPornire)
 {
-    VertexArray conexiuni(Lines);
-    float distanta = l.pSfarsit.x - l.pPornire.x;
-
+    VertexArray linii(Lines);
     Vertex punct;
+    float distanta = coordMouse.x - PunctPornire.position.x;
+    linii.append(PunctPornire);
+
+    punct.position.x = PunctPornire.position.x + distanta / 2;
+    punct.position.y = PunctPornire.position.y;
+    linii.append(punct);
+    linii.append(punct);
+
+    punct.position.y = coordMouse.y;
+    linii.append(punct);
+    linii.append(punct);
+
+    punct.position.x = coordMouse.x;
+    punct.position.y = coordMouse.y;
+    linii.append(punct);
     
-    punct.position.x = l.pPornire.x + distanta / 2;
-    punct.position.y = l.pPornire.y;
-    conexiuni.append(punct);
-    conexiuni.append(punct);
+   return linii;
+}
+void modificareConexiuni(Componenta *comp, Transform TransformPunctConexiune, int nrConexiune)
+{
+        Vector2f punctPornireTransformat;
+        punctPornireTransformat = TransformPunctConexiune.transformPoint((*comp).liniiPtConexiuni[nrConexiune][0].position);
 
-    punct.position.x = l.pPornire.x + distanta / 2;
-    punct.position.y = l.pSfarsit.y;
-    conexiuni.append(punct);
-    conexiuni.append(punct);
-
-    punct.position.x = l.pSfarsit.x;
-    punct.position.y = l.pSfarsit.y;
-    conexiuni.append(punct);
-
-    return conexiuni;
+        VertexArray liniiTemp(Lines);
+        liniiTemp = creareConexiuni((*comp).liniiPtConexiuni[nrConexiune][5].position, punctPornireTransformat);
+        (*comp).liniiPtConexiuni[nrConexiune].clear();
+        (*comp).liniiPtConexiuni[nrConexiune] = liniiTemp;
 }
 
 void coordonateDupaRotire(RectangleShape patrat, punct* Min, punct* Max, Transform tp)
 {
- //   punct Min, Max;
-  //  Transform matrix = patrat.getTransform();
     Vector2f p1, p2, p3, p4;
-    p1 = tp.transformPoint(patrat.getPoint(0));
-    p2 = tp.transformPoint(patrat.getPoint(1));
-    p3 = tp.transformPoint(patrat.getPoint(2));
-    p4 = tp.transformPoint(patrat.getPoint(3));
-    //x
-   // patrat.getGlobalBounds 
-    if (p1.x > (*Max).x)
-    {
-        (*Max).x = p1.x;
-    }
+    FloatRect patrat2;
+   
+   patrat2 =  tp.transformRect(patrat.getLocalBounds());
+    p1.x = patrat2.left;
+    p1.y = patrat2.top;
+
+    p2.x = patrat2.left + patrat2.width;
+    p2.y = patrat2.top;
+
+    p3.x = patrat2.left + patrat2.width;
+    p3.y = patrat2.top + patrat2.height;
+
+    p4.x = patrat2.left;
+    p4.y = patrat2.top + patrat2.height;
+
+    (*Max).x = p1.x;
+   
     if (p2.x > (*Max).x)
     {
         (*Max).x = p2.x;
@@ -187,10 +207,7 @@ void coordonateDupaRotire(RectangleShape patrat, punct* Min, punct* Max, Transfo
         (*Min).x = p4.x;
     }
     //y
-    if (p1.y > (*Max).y)
-    {
-        (*Max).y = p1.y;
-    }
+    (*Max).y = p1.y;
     if (p2.y > (*Max).y)
     {
         (*Max).y = p2.y;
@@ -244,6 +261,23 @@ VertexArray scalareLinii(VertexArray linii, float coef)
     }
     return liniiModificate;
 }
+VertexArray desenareConexiuni(RenderWindow& window, Componenta comp, int nrMaxConexiuniElement, elCircuit element)
+{
+    for (int i = 0; i < nrMaxConexiuniElement; i++)
+    {
+        VertexArray linii(Lines);
+        if (comp.areConexiuni[i])
+        {
+            Legatura l;
+            l.pPornire = comp.transformari.getTransform().transformPoint(element.legaturi[i]);
+            
+           // l.pSfarsit = comp.conexiuni[i];
+          //  creareConexiuni(l);
+            return linii;
+        }
+    }
+    
+}
 void desenareMeniuElemente(RenderWindow& window, elCircuit elemente[], int nrElemente)
 {
     Transform t;
@@ -288,68 +322,45 @@ void desenareMeniuElemente(RenderWindow& window, elCircuit elemente[], int nrEle
         {
             window.draw(elemente[i].elipsa, t);
         }
-      //  t.translate(47 / 2, 0);
-      //  t.translate(latimeCasuta, 0);
-
-      /*  VertexArray linieHotar(Lines);
-        Vertex p1, p2;
-        p1.position.x = 0;
-        p1.position.y = 0;
-        p1.color = Color::Green;
-        p2.position.x = 0;
-        p2.position.y = 50;
-        p2.color = Color::Green;
-        linieHotar.append(p1);
-        linieHotar.append(p2);
-        */
+      
     }
 }
 void afisareElement(FILE* f)
 {
+    int conexiuneActiva = -1;
     int i = 0;
-    legatura l1;
-    elCircuit Baterie =  citireCoordonate(f);
-
+    elCircuit element =  citireCoordonate(f);
+    Componenta comp;
+    Legatura legaturi[MAX];
     RenderWindow window(VideoMode(1920, 1080), "SFML works!");
     
     window.setFramerateLimit(60);
-    
-    Transform t;
-    Transform tp, tm;
-
- //   VertexArray lines(Lines);
-
+ 
     float xmin = 300, xmax = -300, ymin = 300, ymax = -300;
     statusuri status = Normal;
-  
-  
-    Baterie.chenar.setFillColor(Color::Transparent);
-    Baterie.chenar.setOutlineThickness(5.f);
-    Baterie.chenar.setOutlineColor(Color::Transparent);
-    
-    Baterie.chenar.setSize(Vector2f(Baterie.latime, Baterie.inaltime));
 
-    Vector2f origin;
-    origin.x =Baterie.latime / 2;
-    origin.y = Baterie.inaltime / 2;
-  //  Baterie.chenar.setOrigin(origin);
-   // tp.translate(200 , 200 );
-    Vector2f size = Baterie.chenar.getSize();
+    element.chenar.setFillColor(Color::Transparent);
+    element.chenar.setOutlineThickness(5.f);
+    element.chenar.setOutlineColor(Color::Transparent);
+    
+    element.chenar.setSize(Vector2f(element.latime, element.inaltime));
+
+    comp.origine.x =element.latime / 2;
+    comp.origine.y = element.inaltime / 2;
+    Vector2f size = element.chenar.getSize();
     size.x *= SIZECOEFINITIAL;
     size.y *= SIZECOEFINITIAL;
   
     VertexArray linie(Lines);
     Vertex punctPornire;
+
     elCircuit elemente[13];
-    for (int i = 0; i < 13; i++) elemente[i] = Baterie;
-    Transformable transformablet;
+    for (int i = 0; i < 13; i++) elemente[i] = element;
     
-    transformablet.move(origin.x, 300 + origin.y);
-    transformablet.setOrigin(origin.x, origin.y);
-    tp.translate(0, 300);
-    tm.translate(0, 300);
+    comp.transformari.move(comp.origine.x, 300 + comp.origine.y);
+    comp.transformari.setOrigin(comp.origine.x, comp.origine.y);
     VertexArray conexiuni(Lines);
-    bool areConexiuni = false;
+     
     while (window.isOpen())
     {
         sf::Event event;
@@ -361,114 +372,70 @@ void afisareElement(FILE* f)
 
             case sf::Event::KeyPressed:
                 if (event.key.code == sf::Keyboard::Right) {
-                    transformablet.move(50, 0); 
-                    tp.translate(50, 0);
-                  //  Baterie.chenar.move(50, 0);
-                    Transform TransformPunctConexiune;
-                    TransformPunctConexiune.translate(50, 0);
-                    l1.pPornire = TransformPunctConexiune.transformPoint(l1.pPornire);
-                    if (areConexiuni)
-                    {
-                        conexiuni = creareConexiuni(l1);
-                        linie.clear();
-                        linie.append(l1.pPornire);
-                        for (int i = 0; i < conexiuni.getVertexCount(); i++)
+                    comp.transformari.move(50, 0); 
+                    for(int i = 0; i < element.nrLegaturi; i++)
+                        if (comp.areConexiuni[i])
                         {
-                            linie.append(conexiuni[i]);
+                            Transform TransformPunctConexiune;
+                            TransformPunctConexiune.translate(50, 0);
+                            modificareConexiuni(&comp, TransformPunctConexiune, i);
                         }
-                    }
                 }
                 if (event.key.code == sf::Keyboard::Left) {
-                    t.translate(-50, 0);
-                    tp.translate(-50, 0);
-                    transformablet.move(-50, 0);
-                    Transform TransformPunctConexiune;
-                    TransformPunctConexiune.translate(-50, 0);
-                    l1.pPornire = TransformPunctConexiune.transformPoint(l1.pPornire);
-                    if (areConexiuni)
-                    {
-                        conexiuni = creareConexiuni(l1);
-                        linie.clear();
-                        linie.append(l1.pPornire);
-                        for (int i = 0; i < conexiuni.getVertexCount(); i++)
+                    comp.transformari.move(-50, 0);
+                    for (int i = 0; i < element.nrLegaturi; i++)
+                        if (comp.areConexiuni[i])
                         {
-                            linie.append(conexiuni[i]);
+                            Transform TransformPunctConexiune;
+                            TransformPunctConexiune.translate(-50, 0);
+                            modificareConexiuni(&comp, TransformPunctConexiune, i);
                         }
-                    }
                 }
                 else if (event.key.code == sf::Keyboard::Up) {
-                    t.translate(0, -50);
-                    tp.translate(0, -50);
-                //    tm.translate(0, -50);
-                    transformablet.move(0, -50);
-                    if (areConexiuni)
-                    {
-                        l1.pPornire.y -= 50;
-                        conexiuni = creareConexiuni(l1);
-                        linie.clear();
-                        linie.append(l1.pPornire);
-                        for (int i = 0; i < conexiuni.getVertexCount(); i++)
+                    comp.transformari.move(0, -50);
+                    for (int i = 0; i < element.nrLegaturi; i++)
+                        if (comp.areConexiuni[i])
                         {
-                            linie.append(conexiuni[i]);
+                            Transform TransformPunctConexiune;
+                            TransformPunctConexiune.translate(0, -50);
+                            modificareConexiuni(&comp, TransformPunctConexiune, i);
                         }
-                    }
+                   
                 }
                 else if (event.key.code == sf::Keyboard::Down) {
-                    t.translate(0, 50);
-                    tp.translate(0, 50);
-                 //   tm.translate(0, 50);
-                    transformablet.move(0, 50);
-                    if (areConexiuni)
-                    {
-                        l1.pPornire.y += 50;
-                        conexiuni = creareConexiuni(l1);
-                        linie.clear();
-                        linie.append(l1.pPornire);
-                        for (int i = 0; i < conexiuni.getVertexCount(); i++)
+                    comp.transformari.move(0, 50);
+                    for (int i = 0; i < element.nrLegaturi; i++)
+                        if (comp.areConexiuni[i])
                         {
-                            linie.append(conexiuni[i]);
+                            Transform TransformPunctConexiune;
+                            TransformPunctConexiune.translate(0, 50);
+                            modificareConexiuni(&comp, TransformPunctConexiune, i);
                         }
-                    }
                 }
                 else if (event.key.code == sf::Keyboard::R) {
-                    //t.rotate(10,origin.x, origin.y);
-                    transformablet.rotate(10);
-                    tp.rotate(10, origin);
-                    tm.rotate(10, origin);
-                    Transform TransformPunctConexiune;
-                    TransformPunctConexiune.rotate(10, tp.transformPoint(origin));
-                    l1.pPornire = TransformPunctConexiune.transformPoint(l1.pPornire);
-                    if (areConexiuni)
-                    {
-                        conexiuni = creareConexiuni(l1);
-                        linie.clear();
-                        linie.append(l1.pPornire);
-                        for (int i = 0; i < conexiuni.getVertexCount(); i++)
+                    comp.transformari.rotate(10);
+                    for (int i = 0; i < element.nrLegaturi; i++)
+                        if (comp.areConexiuni[i])
                         {
-                            linie.append(conexiuni[i]);
+                            Transform TransformPunctConexiune;
+                            TransformPunctConexiune.rotate(10, comp.transformari.getTransform().transformPoint(comp.origine));
+                            modificareConexiuni(&comp, TransformPunctConexiune, i);
                         }
-                    }
                 }
                 else if (event.key.code == sf::Keyboard::M) {
-                    Vector2f size = Baterie.chenar.getSize();
+                    Vector2f size = element.chenar.getSize();
                     size.x *= 0.5;
                     size.y *= 0.4;
-                    tp.scale(0.5, 0.5, origin.x, origin.y);
-                    t.scale(0.5,0.5,origin.x, origin.y);
-                    transformablet.scale(0.5, 0.5);
-                    Transform TransformPunctConexiune;
-                    TransformPunctConexiune.scale(0.5, 0.5, tp.transformPoint(origin).x, tp.transformPoint(origin).y);
-                    l1.pPornire = TransformPunctConexiune.transformPoint(l1.pPornire);
-                    if (areConexiuni)
-                    {
-                        conexiuni = creareConexiuni(l1);
-                        linie.clear();
-                        linie.append(l1.pPornire);
-                        for (int i = 0; i < conexiuni.getVertexCount(); i++)
+                   
+                    comp.transformari.scale(0.5, 0.5);
+
+                    for (int i = 0; i < element.nrLegaturi; i++)
+                        if (comp.areConexiuni[i])
                         {
-                            linie.append(conexiuni[i]);
+                            Transform TransformPunctConexiune;
+                            TransformPunctConexiune.scale(0.5, 0.5, comp.transformari.getTransform().transformPoint(comp.origine).x, comp.transformari.getTransform().transformPoint(comp.origine).y);
+                            modificareConexiuni(&comp, TransformPunctConexiune, i);
                         }
-                    }
                 }
                 else if (event.key.code == sf::Keyboard::E) {
                     window.close();
@@ -481,26 +448,23 @@ void afisareElement(FILE* f)
                 if (status != DesenareLinie)
                 {
                     punct max, min;
-                    coordonateDupaRotire(Baterie.chenar, &min, &max, transformablet.getTransform());
-
-                    if (coordonateMouse.x >= min.x && coordonateMouse.y >= min.y
-                        && coordonateMouse.x <= max.x && coordonateMouse.y <= max.y)
+                    coordonateDupaRotire(element.chenar, &min, &max, comp.transformari.getTransform());
+                   if (coordonateMouse.x >= min.x && coordonateMouse.y >= min.y
+                       && coordonateMouse.x <= max.x && coordonateMouse.y <= max.y)
                     {
-                        Baterie.chenar.setOutlineColor(Color::Blue);
+                        element.chenar.setOutlineColor(Color::Blue);
                     }
                     else
-                        Baterie.chenar.setOutlineColor(Color::Transparent);
+                        element.chenar.setOutlineColor(Color::Transparent);
                 }
                 else
                 {
-                    l1.pSfarsit.x = coordonateMouse.x;
-                    l1.pSfarsit.y = coordonateMouse.y;
-                    conexiuni = creareConexiuni(l1);
-                    linie.clear();
-                    linie.append(l1.pPornire);
-                    for (int i = 0; i < conexiuni.getVertexCount(); i++)
+                    if (comp.conexiuneActiva != -1)
                     {
-                        linie.append(conexiuni[i]);
+                        VertexArray liniiTemp(Lines);
+                        liniiTemp = creareConexiuni((Vector2f)coordonateMouse, comp.liniiPtConexiuni[comp.conexiuneActiva][0]);
+                        comp.liniiPtConexiuni[comp.conexiuneActiva].clear();
+                        comp.liniiPtConexiuni[comp.conexiuneActiva] = liniiTemp;
                     }
                    
                 }
@@ -512,23 +476,26 @@ void afisareElement(FILE* f)
                 if (status != DesenareLinie)
                 {
                     linie.clear();
-                    for (int i = 0; i < Baterie.nrLegaturi; i++)
+                 
+                    for (int i = 0; i < element.nrLegaturi; i++)
                     {
-                        Vertex punctTransfomrat = transformablet.getTransform().transformPoint(Baterie.legaturi[i].x, Baterie.legaturi[i].y);
+                        Vertex punctTransfomrat = comp.transformari.getTransform().transformPoint(element.legaturi[i].x, element.legaturi[i].y);
+                        
+                            if (abs(punctTransfomrat.position.x - coordonateMouse.x) < 30 && abs(punctTransfomrat.position.y - coordonateMouse.y) < 30)
+                            {
+                                comp.conexiuneActiva = i;
+                                comp.areConexiuni[i] = true;
+                                comp.liniiPtConexiuni[comp.conexiuneActiva].setPrimitiveType(Lines);
 
-                        if (abs(punctTransfomrat.position.x - coordonateMouse.x) < 30 && abs(punctTransfomrat.position.y - coordonateMouse.y) < 30)
-                        {
-                            l1.pPornire.x = punctTransfomrat.position.x;
-                            l1.pPornire.y = punctTransfomrat.position.y;
-                            status = DesenareLinie;
-                            
-                            areConexiuni = true;
-                        }
+                                status = DesenareLinie;
+                                comp.liniiPtConexiuni[comp.conexiuneActiva].append(punctTransfomrat);
+                               
+                            }
                     }
                 }
                 else
                 {
-                   
+                    conexiuneActiva = -1;
                     status = Normal;
                 }
                 break;
@@ -543,10 +510,13 @@ void afisareElement(FILE* f)
         transformElBara.translate(0, 50);
        
         desenareMeniuElemente(window, elemente, 12);
-        window.draw(linie);
-        window.draw(Baterie.linii, transformablet.getTransform());
+    //    desenareConexiuni(window, comp, element.nrLegaturi, element);
+        for(int i = 0; i < element.nrLegaturi; i++)
+            if(comp.areConexiuni[i])
+         window.draw(comp.liniiPtConexiuni[i]);
+        window.draw(element.linii, comp.transformari.getTransform());
         
-        window.draw(Baterie.chenar, transformablet.getTransform());
+        window.draw(element.chenar, comp.transformari.getTransform());
         //window.draw(line2, 2, Lines,t);
 
         window.display();

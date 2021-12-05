@@ -3,7 +3,7 @@
 2. coordonate fisiere minimul la x, y, sa se citeasca toate elementele
 
 
-tipul (baterie, ...)
+tipul (element, ...)
 offestx, offsety
 legatuile - x, y
 coefResize

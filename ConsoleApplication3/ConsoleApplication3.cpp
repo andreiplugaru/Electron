@@ -7,7 +7,8 @@
 #define SIN(x) sin(x * 3.141592653589 / 180)
 #define COS(x) cos(x * 3.141592653589 / 180)
 #define SIZECOEFINITIAL 50
-#define NULLVECTOR Vector2f x = NAN, y = NAN
+#define INALTIMEMENIUELEMENTE 150
+#define PI 3.141592
 using namespace sf;
 using namespace std;
 struct punct
@@ -22,15 +23,18 @@ struct linie
 };
 struct Componenta
 {
+    int idElement;
     float offsetX;
     float offsetY;
-    Vector2f origine;
+    
     float unghiRotire;
     bool areConexiuni[MAX] = { false };
     int conexiuneActiva;
     Vertex conexiuni[MAX];
     VertexArray liniiPtConexiuni[MAX];
     Transformable transformari;
+    RectangleShape chenar;
+    bool activ;
 };
 struct elCircuit {
     char denumire[30];
@@ -38,24 +42,31 @@ struct elCircuit {
     CircleShape elipsa;
     VertexArray arc;
     RectangleShape patrat;
+    Vector2f origine;
     unsigned nrLegaturi;
     unsigned nrLinii;
     float inaltime;
     float latime;
     Vector2f legaturi[MAX];
     float sizeCoef = 50;
-    RectangleShape chenar;
+   
 };
 struct Legatura
 {
     Vector2f pPornire;
     Vector2f pSfarsit;
 };
+struct ComponentaActiva
+{
+    int id = -1;
+};
 enum statusuri{
     DesenareLinie,
-    Normal
+    Normal,
+    InserareElement,
+    InteractiuneComponenta
 };
-
+float latimeCasuta;
 elCircuit citireCoordonate(FILE* f)
 {
     elCircuit o1;
@@ -129,7 +140,7 @@ elCircuit citireCoordonate(FILE* f)
 }
 VertexArray creareConexiuni(Vector2f coordMouse, Vertex PunctPornire)
 {
-    VertexArray linii(Lines);
+    VertexArray linii(Lines); // de schimbat cu linestrip
     Vertex punct;
     float distanta = coordMouse.x - PunctPornire.position.x;
     linii.append(PunctPornire);
@@ -287,8 +298,7 @@ void desenareMeniuElemente(RenderWindow& window, elCircuit elemente[], int nrEle
     
     float scale = 0.5;
    
- //  t.translate(47/2, 0);
-    float latimeCasuta = (1920 - (nrElemente + 1)*10) / nrElemente;
+    latimeCasuta = (1920 - (nrElemente + 1)*10) / nrElemente;
     Vector2f dimCasuta;
     dimCasuta.x = latimeCasuta;
     dimCasuta.y = 50;
@@ -298,14 +308,10 @@ void desenareMeniuElemente(RenderWindow& window, elCircuit elemente[], int nrEle
         RectangleShape casuta;
         sf::Color albastru(0, 102, 204);
         casuta.setPosition(latimeCasuta * i + 10*(i+1), 100);
-        //casuta.setPosition(500, 100);
         casuta.setSize(dimCasuta);
         casuta.setFillColor(albastru);
-      //  casuta.setOutlineThickness(5.f);
-     //   casuta.setOutlineColor(Color::Blue);
         window.draw(casuta);
         t.translate(offsetX + latimeCasuta,0);
-      //  t.translate(offsetX + latimeCasuta + 20, 0);
         if (elemente[i].linii.getVertexCount() != 0)
         {
            window.draw(scalareLinii(elemente[i].linii, scale), t);
@@ -325,12 +331,20 @@ void desenareMeniuElemente(RenderWindow& window, elCircuit elemente[], int nrEle
       
     }
 }
+void setareChenar(Componenta *c, elCircuit tipElement)
+{
+    (*c).chenar.setFillColor(Color::Transparent);
+    (*c).chenar.setOutlineThickness(5.f);
+    (*c).chenar.setOutlineColor(Color::Transparent);
+    (*c).chenar.setSize(Vector2f(tipElement.latime, tipElement.inaltime));
+}
 void afisareElement(FILE* f)
 {
     int conexiuneActiva = -1;
     int i = 0;
+    int nrComponenteInserate = 0;
     elCircuit element =  citireCoordonate(f);
-    Componenta comp;
+    Componenta comp[MAX];
     Legatura legaturi[MAX];
     RenderWindow window(VideoMode(1920, 1080), "SFML works!");
     
@@ -339,17 +353,10 @@ void afisareElement(FILE* f)
     float xmin = 300, xmax = -300, ymin = 300, ymax = -300;
     statusuri status = Normal;
 
-    element.chenar.setFillColor(Color::Transparent);
-    element.chenar.setOutlineThickness(5.f);
-    element.chenar.setOutlineColor(Color::Transparent);
-    
-    element.chenar.setSize(Vector2f(element.latime, element.inaltime));
+   
 
-    comp.origine.x =element.latime / 2;
-    comp.origine.y = element.inaltime / 2;
-    Vector2f size = element.chenar.getSize();
-    size.x *= SIZECOEFINITIAL;
-    size.y *= SIZECOEFINITIAL;
+    element.origine.x =element.latime / 2;
+    element.origine.y = element.inaltime / 2;
   
     VertexArray linie(Lines);
     Vertex punctPornire;
@@ -357,9 +364,10 @@ void afisareElement(FILE* f)
     elCircuit elemente[13];
     for (int i = 0; i < 13; i++) elemente[i] = element;
     
-    comp.transformari.move(comp.origine.x, 300 + comp.origine.y);
-    comp.transformari.setOrigin(comp.origine.x, comp.origine.y);
+ //   comp.transformari.move(element.origine.x, 300 + element.origine.y);
+   
     VertexArray conexiuni(Lines);
+    ComponentaActiva compActiv;
      
     while (window.isOpen())
     {
@@ -369,133 +377,177 @@ void afisareElement(FILE* f)
         {
             switch (event.type)
             {
-
             case sf::Event::KeyPressed:
                 if (event.key.code == sf::Keyboard::Right) {
-                    comp.transformari.move(50, 0); 
+                    comp[compActiv.id].transformari.move(50, 0);
                     for(int i = 0; i < element.nrLegaturi; i++)
-                        if (comp.areConexiuni[i])
+                        if (comp[compActiv.id].areConexiuni[i])
                         {
                             Transform TransformPunctConexiune;
                             TransformPunctConexiune.translate(50, 0);
-                            modificareConexiuni(&comp, TransformPunctConexiune, i);
+                            modificareConexiuni(&comp[compActiv.id], TransformPunctConexiune, i);
                         }
                 }
                 if (event.key.code == sf::Keyboard::Left) {
-                    comp.transformari.move(-50, 0);
+                    comp[compActiv.id].transformari.move(-50, 0);
                     for (int i = 0; i < element.nrLegaturi; i++)
-                        if (comp.areConexiuni[i])
+                        if (comp[compActiv.id].areConexiuni[i])
                         {
                             Transform TransformPunctConexiune;
                             TransformPunctConexiune.translate(-50, 0);
-                            modificareConexiuni(&comp, TransformPunctConexiune, i);
+                            modificareConexiuni(&comp[compActiv.id], TransformPunctConexiune, i);
                         }
                 }
                 else if (event.key.code == sf::Keyboard::Up) {
-                    comp.transformari.move(0, -50);
+                    comp[compActiv.id].transformari.move(0, -50);
                     for (int i = 0; i < element.nrLegaturi; i++)
-                        if (comp.areConexiuni[i])
+                        if (comp[compActiv.id].areConexiuni[i])
                         {
                             Transform TransformPunctConexiune;
                             TransformPunctConexiune.translate(0, -50);
-                            modificareConexiuni(&comp, TransformPunctConexiune, i);
+                            modificareConexiuni(&comp[compActiv.id], TransformPunctConexiune, i);
                         }
                    
                 }
                 else if (event.key.code == sf::Keyboard::Down) {
-                    comp.transformari.move(0, 50);
+                    comp[compActiv.id].transformari.move(0, 50);
                     for (int i = 0; i < element.nrLegaturi; i++)
-                        if (comp.areConexiuni[i])
+                        if (comp[compActiv.id].areConexiuni[i])
                         {
                             Transform TransformPunctConexiune;
                             TransformPunctConexiune.translate(0, 50);
-                            modificareConexiuni(&comp, TransformPunctConexiune, i);
+                            modificareConexiuni(&comp[compActiv.id], TransformPunctConexiune, i);
                         }
                 }
                 else if (event.key.code == sf::Keyboard::R) {
-                    comp.transformari.rotate(10);
+                    comp[compActiv.id].transformari.rotate(10);
                     for (int i = 0; i < element.nrLegaturi; i++)
-                        if (comp.areConexiuni[i])
+                        if (comp[compActiv.id].areConexiuni[i])
                         {
                             Transform TransformPunctConexiune;
-                            TransformPunctConexiune.rotate(10, comp.transformari.getTransform().transformPoint(comp.origine));
-                            modificareConexiuni(&comp, TransformPunctConexiune, i);
+                            TransformPunctConexiune.rotate(10, comp[compActiv.id].transformari.getTransform().transformPoint(elemente[comp[compActiv.id].idElement].origine));
+                            modificareConexiuni(&comp[compActiv.id], TransformPunctConexiune, i);
                         }
                 }
                 else if (event.key.code == sf::Keyboard::M) {
-                    Vector2f size = element.chenar.getSize();
+                  /*  Vector2f size = element.chenar.getSize();
                     size.x *= 0.5;
                     size.y *= 0.4;
-                   
-                    comp.transformari.scale(0.5, 0.5);
+                   */
+                    comp[compActiv.id].transformari.scale(0.5, 0.5);
 
                     for (int i = 0; i < element.nrLegaturi; i++)
-                        if (comp.areConexiuni[i])
+                        if (comp[compActiv.id].areConexiuni[i])
                         {
                             Transform TransformPunctConexiune;
-                            TransformPunctConexiune.scale(0.5, 0.5, comp.transformari.getTransform().transformPoint(comp.origine).x, comp.transformari.getTransform().transformPoint(comp.origine).y);
-                            modificareConexiuni(&comp, TransformPunctConexiune, i);
+                            TransformPunctConexiune.scale(0.5, 0.5, comp[compActiv.id].transformari.getTransform().transformPoint(elemente[comp[compActiv.id].idElement].origine).x, comp[compActiv.id].transformari.getTransform().transformPoint(elemente[comp[compActiv.id].idElement].origine).y);
+                            modificareConexiuni(&comp[compActiv.id], TransformPunctConexiune, i);
                         }
                 }
                 else if (event.key.code == sf::Keyboard::E) {
                     window.close();
                 }
                 break;
-
+                
             case sf::Event::MouseMoved:
             {
                 Vector2i coordonateMouse = Mouse::getPosition(window);
-                if (status != DesenareLinie)
+                if (status == Normal)
                 {
                     punct max, min;
-                    coordonateDupaRotire(element.chenar, &min, &max, comp.transformari.getTransform());
-                   if (coordonateMouse.x >= min.x && coordonateMouse.y >= min.y
-                       && coordonateMouse.x <= max.x && coordonateMouse.y <= max.y)
+                    for (int i = 0; i < nrComponenteInserate; i++)
                     {
-                        element.chenar.setOutlineColor(Color::Blue);
+                        
+                            coordonateDupaRotire(comp[i].chenar, &min, &max, comp[i].transformari.getTransform());
+                            if (coordonateMouse.x >= min.x && coordonateMouse.y >= min.y
+                                && coordonateMouse.x <= max.x && coordonateMouse.y <= max.y)
+                            {
+                                comp[i].activ = true;
+                                comp[i].chenar.setOutlineColor(Color::Blue);
+                            }
+                            else
+                            {
+                                comp[i].activ = false;
+                                if (compActiv.id != i)
+                                    comp[i].chenar.setOutlineColor(Color::Transparent);
+                            }
+                        
                     }
-                    else
-                        element.chenar.setOutlineColor(Color::Transparent);
                 }
-                else
+                else if (status == DesenareLinie)
                 {
-                    if (comp.conexiuneActiva != -1)
+                    if (comp[compActiv.id].conexiuneActiva != -1)
                     {
                         VertexArray liniiTemp(Lines);
-                        liniiTemp = creareConexiuni((Vector2f)coordonateMouse, comp.liniiPtConexiuni[comp.conexiuneActiva][0]);
-                        comp.liniiPtConexiuni[comp.conexiuneActiva].clear();
-                        comp.liniiPtConexiuni[comp.conexiuneActiva] = liniiTemp;
+                        liniiTemp = creareConexiuni((Vector2f)coordonateMouse, comp[compActiv.id].liniiPtConexiuni[comp[compActiv.id].conexiuneActiva][0]);
+                        comp[compActiv.id].liniiPtConexiuni[comp[compActiv.id].conexiuneActiva].clear();
+                        comp[compActiv.id].liniiPtConexiuni[comp[compActiv.id].conexiuneActiva] = liniiTemp;
                     }
                    
+                }
+                if(status == InserareElement)
+                {
+                    comp[nrComponenteInserate-1].transformari.setPosition(coordonateMouse.x, coordonateMouse.y);
                 }
                 break;
             }
             case sf::Event::MouseButtonPressed:
             {
                 Vector2i coordonateMouse = Mouse::getPosition(window);
-                if (status != DesenareLinie)
+                if (status == Normal)
                 {
-                    linie.clear();
-                 
-                    for (int i = 0; i < element.nrLegaturi; i++)
+                    if (coordonateMouse.y >= 50 && coordonateMouse.y <= INALTIMEMENIUELEMENTE)
                     {
-                        Vertex punctTransfomrat = comp.transformari.getTransform().transformPoint(element.legaturi[i].x, element.legaturi[i].y);
-                        
-                            if (abs(punctTransfomrat.position.x - coordonateMouse.x) < 30 && abs(punctTransfomrat.position.y - coordonateMouse.y) < 30)
+                        for(int i = 0; i < 12; i++)
+                            if (coordonateMouse.x > i * latimeCasuta && coordonateMouse.x < (i + 1) * latimeCasuta)
                             {
-                                comp.conexiuneActiva = i;
-                                comp.areConexiuni[i] = true;
-                                comp.liniiPtConexiuni[comp.conexiuneActiva].setPrimitiveType(Lines);
-
-                                status = DesenareLinie;
-                                comp.liniiPtConexiuni[comp.conexiuneActiva].append(punctTransfomrat);
-                               
+                                status = InserareElement;
+                                comp[nrComponenteInserate].idElement = i;
+                                comp[nrComponenteInserate].transformari.setOrigin(element.origine.x, element.origine.y);
+                                nrComponenteInserate++;
                             }
                     }
+                    else
+                    {
+                        for (int i = 0; i < nrComponenteInserate; i++)
+                        {
+                            if (comp[i].activ)
+                            {
+                                compActiv.id = i;
+                                comp[compActiv.id].chenar.setOutlineColor(Color::Blue);
+                                break;
+                               
+                            }
+                            else
+                                comp[i].chenar.setOutlineColor(Color::Transparent);
+                            compActiv.id = -1;
+                        }
+                    }
+                    if(compActiv.id!=-1)
+                        for (int i = 0; i < elemente[comp[compActiv.id].idElement].nrLegaturi; i++)
+                        {
+                            Vertex punctTransfomrat = comp[compActiv.id].transformari.getTransform().transformPoint(elemente[comp[compActiv.id].idElement].legaturi[i].x, elemente[comp[compActiv.id].idElement].legaturi[i].y);
+                        
+                                if (abs(punctTransfomrat.position.x - coordonateMouse.x) < 30 && abs(punctTransfomrat.position.y - coordonateMouse.y) < 30)
+                                {
+                                    comp[compActiv.id].conexiuneActiva = i;
+                                    comp[compActiv.id].areConexiuni[i] = true;
+                                    comp[compActiv.id].liniiPtConexiuni[comp[compActiv.id].conexiuneActiva].setPrimitiveType(Lines);
+
+                                    status = DesenareLinie;
+                                    comp[compActiv.id].liniiPtConexiuni[comp[compActiv.id].conexiuneActiva].append(punctTransfomrat);
+                               
+                                }
+                        }
                 }
-                else
+                else if(status == DesenareLinie)
                 {
                     conexiuneActiva = -1;
+                    status = Normal;
+                }
+                else if(status == InserareElement)
+                {
+                    setareChenar(&comp[nrComponenteInserate - 1], elemente[comp[nrComponenteInserate - 1].idElement]);
                     status = Normal;
                 }
                 break;
@@ -510,14 +562,31 @@ void afisareElement(FILE* f)
         transformElBara.translate(0, 50);
        
         desenareMeniuElemente(window, elemente, 12);
-    //    desenareConexiuni(window, comp, element.nrLegaturi, element);
-        for(int i = 0; i < element.nrLegaturi; i++)
-            if(comp.areConexiuni[i])
-         window.draw(comp.liniiPtConexiuni[i]);
-        window.draw(element.linii, comp.transformari.getTransform());
-        
-        window.draw(element.chenar, comp.transformari.getTransform());
-        //window.draw(line2, 2, Lines,t);
+        for (int j = 0; j < nrComponenteInserate; j++)
+        {
+            for (int i = 0; i < elemente[comp[j].idElement].nrLegaturi; i++)
+                if (comp[j].areConexiuni[i])
+                    window.draw(comp[j].liniiPtConexiuni[i]);
+
+            window.draw(elemente[comp[j].idElement].linii, comp[j].transformari.getTransform());
+            window.draw(comp[j].chenar, comp[j].transformari.getTransform());
+        }
+
+        sf::VertexArray player(LineStrip);
+        double degrees = 360.0 / 32.0;
+
+        for (double i = 0; i < 32; i++)
+        {
+            float value = (PI * 2) / i;
+            float y = sin(value) * degrees*10;
+            float x = cos(value) * degrees*10;
+            Vertex p;
+            p.position.x = 300+x;
+            p.position.y = 300+y;
+            player.append(p);
+        }
+
+        window.draw(player);
 
         window.display();
     }

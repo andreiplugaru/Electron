@@ -18,6 +18,12 @@
     <ClCompile Include="ConsoleApplication3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Conexiuni.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Circuit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="sfml-audio-2.dll" />
@@ -30,10 +36,20 @@
     <None Include="sfml-system-d-2.dll" />
     <None Include="sfml-window-2.dll" />
     <None Include="sfml-window-d-2.dll" />
+    <None Include="..\..\..\..\Downloads\STOP.PS" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Conexiuni.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Structuri.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Circuit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="..\..\..\..\Electrolize\Electrolize-Regular.ttf" />
   </ItemGroup>
 </Project>

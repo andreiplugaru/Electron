@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#define MAX 100
+#include "Defineuri.h"
 using namespace sf;
 
 struct Punct
@@ -16,7 +16,9 @@ struct Componenta
     Vertex conexiuni[MAX];
     VertexArray liniiPtConexiuni[MAX];
     Transformable transformari;
-    RectangleShape chenar;
+    char nume[MAXNUME] = { 0 };
+    unsigned rezistenta = 0;
+    unsigned voltaj = 0;
     bool activ;
 };
 struct ElCircuit {
@@ -26,6 +28,7 @@ struct ElCircuit {
     VertexArray arc;
     RectangleShape dreptunghi;
     Vector2f origine;
+    RectangleShape chenar;
     unsigned nrLegaturi;
     unsigned nrLinii;
     Vector2f dimensiuni;
@@ -51,7 +54,8 @@ enum Statusuri {
     Normal,
     InserareElement,
     InteractiuneComponenta,
-    ModificarePozitieComponenta
+    ModificarePozitieComponenta,
+    ModificareParametri
 };
 
 struct PunctMinMax
@@ -64,3 +68,4 @@ struct Optiuni
     float latimeChenar;
     float coefScalare;
 };
+

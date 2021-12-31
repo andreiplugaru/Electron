@@ -1,4 +1,8 @@
 #pragma once
 #include "Structuri.h"
-void salvareCircuit(Componenta* comp, int nrComponente);
-void deschidereCircuit(Componenta* comp, int* nrComponente);
+enum Mod { Salvare, Deschidere };
+void salvareCircuit(Componenta* comp, int nrComponente, Legatura* legaturi, int nrLegaturi, char numeFisier[]);
+void deschidereCircuit(Componenta* comp, int* nrComponente, Legatura* legaturi, int* nrLegaturi, char numeFisier[]);
+bool deschidereFereastra(Mod mod);
+void FereastraSucces(char mesajSucces[]);
+void FereastraEroare(char mesajEroare[]);

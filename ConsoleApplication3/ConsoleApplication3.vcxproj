@@ -148,6 +148,9 @@
     <ClCompile Include="Circuit.cpp" />
     <ClCompile Include="Conexiuni.cpp" />
     <ClCompile Include="ConsoleApplication3.cpp" />
+    <ClCompile Include="Meniu.cpp" />
+    <ClCompile Include="Parametri.cpp" />
+    <ClCompile Include="Parametri.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\Downloads\STOP.PS" />
@@ -165,10 +168,12 @@
   <ItemGroup>
     <ClInclude Include="Circuit.h" />
     <ClInclude Include="Conexiuni.h" />
+    <ClInclude Include="Defineuri.h" />
+    <ClInclude Include="Meniu.h" />
     <ClInclude Include="Structuri.h" />
   </ItemGroup>
   <ItemGroup>
-    <Font Include="..\..\..\..\Electrolize\Electrolize-Regular.ttf" />
+    <Font Include="Courier.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,23 +4,23 @@
 using namespace sf;
 VertexArray creareConexiuni(Legatura leg)
 {
-    VertexArray linii(Lines); // de schimbat cu linestrip
-    Vertex Punct;
+    VertexArray linii(LinesStrip); // de schimbat cu linestrip
+    Vertex punct;
+    punct.color = Color::Green;
     float distanta = leg.punct2.x - leg.punct1.x;
-    linii.append(leg.punct1);
+    punct.position = leg.punct1;
+    linii.append(punct);
 
-    Punct.position.x = leg.punct1.x + distanta / 2;
-    Punct.position.y = leg.punct1.y;
-    linii.append(Punct);
-    linii.append(Punct);
+    punct.position.x = leg.punct1.x + distanta / 2;
+    punct.position.y = leg.punct1.y;
+    linii.append(punct);
 
-    Punct.position.y = leg.punct2.y;
-    linii.append(Punct);
-    linii.append(Punct);
+    punct.position.y = leg.punct2.y;
+    linii.append(punct);
 
-    Punct.position.x = leg.punct2.x;
-    Punct.position.y = leg.punct2.y;
-    linii.append(Punct);
+    punct.position.x = leg.punct2.x;
+    punct.position.y = leg.punct2.y;
+    linii.append(punct);
 
     return linii;
 }

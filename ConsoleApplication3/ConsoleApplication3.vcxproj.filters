@@ -33,6 +33,9 @@
     <ClCompile Include="Parametri.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Ajutor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="sfml-audio-2.dll" />
@@ -63,8 +66,13 @@
     <ClInclude Include="Defineuri.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Ajutor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Font Include="Courier.ttf" />
+    <Image Include="..\..\..\..\download (1).png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

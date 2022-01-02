@@ -7,10 +7,10 @@ enum Mod  { Salvare, Deschidere};
 void FereastraEroare(char mesajEroare[])
 {
     Image image;
-    image.loadFromFile("eroare.png");
+    image.loadFromFile("icons\\eroare.png");
     
     sf::Font font;
-    font.loadFromFile("RobotoSlab-Font.ttf");
+    font.loadFromFile("fonts\\RobotoSlab-Font.ttf");
     sf::Text t;
     t.setFillColor(sf::Color::White);
     t.setFont(font);
@@ -42,10 +42,10 @@ void FereastraEroare(char mesajEroare[])
 void FereastraSucces(char mesajSucces[])
 {
     Image image;
-    image.loadFromFile("succes.png");
+    image.loadFromFile("icons\\succes.png");
 
     sf::Font font;
-    font.loadFromFile("RobotoSlab-Font.ttf");
+    font.loadFromFile("fonts\\RobotoSlab-Font.ttf");
     sf::Text t;
     t.setFillColor(sf::Color::White);
     t.setFont(font);
@@ -77,7 +77,7 @@ void FereastraSucces(char mesajSucces[])
 bool deschidereFereastra(Mod mod, char nume[])
 {
     sf::Font font;
-    if (!font.loadFromFile("RobotoSlab-Font.ttf"))
+    if (!font.loadFromFile("fonts\\RobotoSlab-Font.ttf"))
         return false;
     sf::Text t;
     t.setFillColor(sf::Color::White);
@@ -88,7 +88,7 @@ bool deschidereFereastra(Mod mod, char nume[])
     int i = 0;
     t.setString(nume);
     Image image;
-    image.loadFromFile("folder.png");
+    image.loadFromFile("icons\\folder.png");
     sf::RenderWindow window(sf::VideoMode(500, 40), "Inserare nume fisier(fara extensie)", Style::Close);
     window.setFramerateLimit(30);
     window.setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());

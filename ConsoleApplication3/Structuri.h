@@ -67,5 +67,13 @@ struct Optiuni
 {
     float latimeChenar;
     float coefScalare;
+    int distantaMiscare;
+    int unghiRotire;
 };
-
+struct Circuit 
+{
+    Componenta componente[MAX];
+    ElCircuit elemente[NUMAR_ELEMENTE];
+    Legatura legaturi[MAX];
+    unsigned componentaSelectata = -1
+};

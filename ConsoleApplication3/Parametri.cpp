@@ -23,8 +23,10 @@ bool salvareDate(Componenta *componenta, char rezistenta[], char voltaj[])
 }
 void afisareFereastraParametri(Componenta* componenta)
 {
+	Image image;
+	image.loadFromFile("icons\\gears.png");
 	sf::Font font;
-	font.loadFromFile("Courier.ttf");
+	font.loadFromFile("fonts\\Courier.ttf");
 	sf::Text t;
 	t.setFillColor(sf::Color::White);
 	t.setFont(font);
@@ -40,7 +42,7 @@ void afisareFereastraParametri(Componenta* componenta)
 	unsigned latimeMaxText = t.getLocalBounds().width;
 	sf::RenderWindow window(sf::VideoMode(latimeFereastra, inaltimeFereastra, 32), "Parametri", sf::Style::Close);
 	window.setFramerateLimit(30);
-	//  ErrWindow.setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());
+	window.setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());
 
 	sf::String ErrMessage;
 	bool running = true;

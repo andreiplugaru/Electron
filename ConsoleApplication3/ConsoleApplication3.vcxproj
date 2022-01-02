@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Ajutor.cpp" />
     <ClCompile Include="Circuit.cpp" />
     <ClCompile Include="Conexiuni.cpp" />
     <ClCompile Include="ConsoleApplication3.cpp" />
@@ -166,6 +167,7 @@
     <None Include="sfml-window-d-2.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Ajutor.h" />
     <ClInclude Include="Circuit.h" />
     <ClInclude Include="Conexiuni.h" />
     <ClInclude Include="Defineuri.h" />
@@ -173,7 +175,7 @@
     <ClInclude Include="Structuri.h" />
   </ItemGroup>
   <ItemGroup>
-    <Font Include="Courier.ttf" />
+    <Image Include="..\..\..\..\download (1).png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

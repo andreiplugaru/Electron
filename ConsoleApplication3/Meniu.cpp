@@ -3,7 +3,7 @@
 #include "Structuri.h"
 #include <string> 
 using namespace sf;
-char optiuniMeniu[NUMAR_OPTIUNI_MENIU][15] = { "MENIU","SALVARE" ,"SALVARE CA","DESCHIDERE","RESETARE","AJUTOR" };
+char optiuniMeniu[NUMAR_OPTIUNI_MENIU][15] = { "MENIU","SALVARE" ,"SALVARE CA","DESCHIDERE","RESETARE","AJUTOR","Setari" };
 float latimeCasutaOptiuni;
 void desenareMeniuOptiuni(RenderWindow& window, Font font)
 {

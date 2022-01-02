@@ -8,6 +8,7 @@
 #include "Circuit.h"
 #include "Meniu.h"
 #include "Parametri.h"
+#include "Ajutor.h"
 char locatieFisiere[13][20] = { "PS\\BATERIE.PS","PS\\AMPLOP.PS" ,"PS\\CONDENS.PS","PS\\DIODA.PS","PS\\NOD.PS","PS\\POLARIZ.PS","PS\\REZIST.PS","PS\\SERVOMOT.PS","PS\\SINU.PS","PS\\TRANZNPN.PS","PS\\TRANZPNP.PS","PS\\ZENNER.PS","PS\\STOP.PS" };
 using namespace sf;
 using namespace std;
@@ -537,7 +538,9 @@ void stergereLegaturi(Legatura legaturi[], unsigned int idComponenta, int *nrLeg
 void stergereComponenta(Componenta comp[], unsigned int nrComponente, unsigned int idComponenta)
 {
     for (int i = idComponenta; i < nrComponente - 1; i++)
+    {
         comp[i] = comp[i + 1];
+    }
 }
 /*void setareChenar(Componenta* c, ElCircuit tipElement)
 {
@@ -566,22 +569,59 @@ void stergereComponenta(Componenta comp[], unsigned int nrComponente, unsigned i
     text.setCharacterSize(24);
     (*w).draw(text);
 }*/
+bool verificareColiziune(Componenta componete[], int compId, int nrComponente, ElCircuit elemente[])
+{
+    ElCircuit elementVerificat = elemente[componete[compId].idElement];
+    for (int i = 0; i < nrComponente; i++)
+    {
+        if (compId != i)
+        {
+            ElCircuit elementCurent = elemente[componete[i].idElement];
+            if (componete[i].transformari.getTransform().transformRect(elementCurent.chenar.getGlobalBounds()).intersects(
+                componete[compId].transformari.getTransform().transformRect(elementVerificat.chenar.getGlobalBounds())))
+            {
+                cout << "Coliziune";
+                return true;
+            }
+        }
+    }
+    return false;
+}
+void miscareTastatura(Componenta componete[], int compId, int nrComponente, ElCircuit elemente[], int nrLegaturi, Legatura legaturi[], float offsetx, float offsety)
+{
+    Transformable transformPunctConexiune;
+    componete[compId].transformari.move(offsetx, offsety);
+    if (verificareColiziune(componete, compId, nrComponente, elemente) == false)
+    {
+        transformPunctConexiune.move(offsetx, offsety);
+        Vector2f coordonateInafaraFereastra = ieseDinFereastra(componete[compId], elemente[componete[compId].idElement]);
+        if (abs(coordonateInafaraFereastra.x) < optiuni.distantaMiscare && abs(coordonateInafaraFereastra.y) < optiuni.distantaMiscare)
+            modificareConexiuni(coordonateInafaraFereastra, nrLegaturi, legaturi, compId, transformPunctConexiune.getTransform());
+
+        componete[compId].transformari.move(coordonateInafaraFereastra);
+    }
+    else
+    {
+        componete[compId].transformari.move(-offsetx, -offsety);
+    }
+}
 void afisareElemente()
 {
-    int conexiuneActiva = -1;
     int nrComponenteInserate = 0;
     int nrLegaturi = 0;
     char numeFisier[MAX_LUNGIME_FISIER] = {};
+    optiuni.distantaMiscare = 50;
     Componenta comp[MAX];
     Legatura legaturi[MAX];
     RenderWindow window(VideoMode(1920, 1080), "ELECTRON", Style::Fullscreen);
     window.setFramerateLimit(60);
     Statusuri status = Normal; 
-    VertexArray linie(Lines);
-    Vertex PunctPornire;
+   
     optiuni.latimeChenar = 5;
     optiuni.coefScalare = 0.8;
-    ElCircuit elemente[12];
+    optiuni.distantaMiscare = 50;
+    optiuni.unghiRotire = 10;
+    ElCircuit elemente[NUMAR_ELEMENTE];
 
      for (int i = 0; i < 12; i++) 
          elemente[i] = citireInformatii(locatieFisiere[i]);
@@ -589,7 +629,7 @@ void afisareElemente()
     VertexArray conexiuni(Lines);
     ComponentaSelectata compSelectata;
     sf::Font font;
-    if (!font.loadFromFile("RobotoSlab-Font.ttf"))
+    if (!font.loadFromFile("fonts\\RobotoSlab-Font.ttf"))
         cout << "ERROR";
     sf::Text text;
     text.setFont(font);
@@ -628,78 +668,60 @@ void afisareElemente()
                 }
                 if (compSelectata.id == -1) break;
                 if (event.key.code == sf::Keyboard::Right) {
-                    Transformable transformPunctConexiune;
-
-                    transformPunctConexiune.move(50, 0);
-                    comp[compSelectata.id].transformari.move(50, 0);
-                    Vector2f coordonateInafaraFereastra = ieseDinFereastra(comp[compSelectata.id], elemente[comp[compSelectata.id].idElement]);
-                    if(abs(coordonateInafaraFereastra.x) < 50 && abs(coordonateInafaraFereastra.y) < 50)
-                    modificareConexiuni(coordonateInafaraFereastra, nrLegaturi, legaturi, compSelectata.id, transformPunctConexiune.getTransform());
-                    comp[compSelectata.id].transformari.move(coordonateInafaraFereastra);
                     
-                    text.setString("x: ");
+                    miscareTastatura(comp, compSelectata.id, nrComponenteInserate, elemente, nrLegaturi, legaturi, optiuni.distantaMiscare, 0);
                 }
                 else if (event.key.code == sf::Keyboard::Left) {
-                    Transformable transformPunctConexiune;
-                    transformPunctConexiune.move(-50, 0);
-                    comp[compSelectata.id].transformari.move(-50, 0);
-                    Vector2f coordonateInafaraFereastra = ieseDinFereastra(comp[compSelectata.id], elemente[comp[compSelectata.id].idElement]);
-                    if (abs(coordonateInafaraFereastra.x) < 50 && abs(coordonateInafaraFereastra.y) < 50)
-                        modificareConexiuni(coordonateInafaraFereastra, nrLegaturi, legaturi, compSelectata.id, transformPunctConexiune.getTransform());
-                    comp[compSelectata.id].transformari.move(coordonateInafaraFereastra);
+                    miscareTastatura(comp, compSelectata.id, nrComponenteInserate, elemente, nrLegaturi, legaturi, -optiuni.distantaMiscare, 0);
 
                 }
                 else if (event.key.code == sf::Keyboard::Up) {
-                    Transformable transformPunctConexiune;
-                    transformPunctConexiune.move(0, -50);
-                    comp[compSelectata.id].transformari.move(0, -50);
-                    Vector2f coordonateInafaraFereastra = ieseDinFereastra(comp[compSelectata.id], elemente[comp[compSelectata.id].idElement]);
-                
-                    if (abs(coordonateInafaraFereastra.x) <=50 && abs(coordonateInafaraFereastra.y) <= 50)
-                        modificareConexiuni(coordonateInafaraFereastra, nrLegaturi, legaturi, compSelectata.id, transformPunctConexiune.getTransform());
-                    comp[compSelectata.id].transformari.move(coordonateInafaraFereastra);
+                    miscareTastatura(comp, compSelectata.id, nrComponenteInserate, elemente, nrLegaturi, legaturi, 0, -optiuni.distantaMiscare);
 
                 }
                 else if (event.key.code == sf::Keyboard::Down) {
-                    Transformable transformPunctConexiune;
-                    transformPunctConexiune.move(0, 50);
-                    comp[compSelectata.id].transformari.move(0, 50);
-                    Vector2f coordonateInafaraFereastra = ieseDinFereastra(comp[compSelectata.id], elemente[comp[compSelectata.id].idElement]);
-                    if (abs(coordonateInafaraFereastra.x) < 50 && abs(coordonateInafaraFereastra.y) < 50)
-                        modificareConexiuni(coordonateInafaraFereastra, nrLegaturi, legaturi, compSelectata.id, transformPunctConexiune.getTransform());
-                    comp[compSelectata.id].transformari.move(coordonateInafaraFereastra);
+                    miscareTastatura(comp, compSelectata.id, nrComponenteInserate, elemente, nrLegaturi, legaturi, 0, optiuni.distantaMiscare);
+
                 }
                 else if (event.key.code == sf::Keyboard::R) {
                     Transform transformPunctConexiune;
-                  //  transformPunctConexiune.setOrigin(elemente[comp[compSelectata.id].idElement].origine);
-                    transformPunctConexiune.rotate(10, comp[compSelectata.id].transformari.getTransform().transformPoint(elemente[comp[compSelectata.id].idElement].origine));
-                    comp[compSelectata.id].transformari.rotate(10);
-
-                    Vector2f coordonateInafaraFereastra = ieseDinFereastra(comp[compSelectata.id], elemente[comp[compSelectata.id].idElement]);
-                    if (coordonateInafaraFereastra.x == 0 && coordonateInafaraFereastra.y == 0)
+                    comp[compSelectata.id].transformari.rotate(optiuni.unghiRotire);
+                    if (verificareColiziune(comp, compSelectata.id, nrComponenteInserate, elemente) == false)
                     {
-                        modificareConexiuni(coordonateInafaraFereastra, nrLegaturi, legaturi, compSelectata.id, transformPunctConexiune);
+                        transformPunctConexiune.rotate(optiuni.unghiRotire, comp[compSelectata.id].transformari.getTransform().transformPoint(elemente[comp[compSelectata.id].idElement].origine));
+                        Vector2f coordonateInafaraFereastra = ieseDinFereastra(comp[compSelectata.id], elemente[comp[compSelectata.id].idElement]);
+                        if (coordonateInafaraFereastra.x == 0 && coordonateInafaraFereastra.y == 0)
+                        {
+                            modificareConexiuni(coordonateInafaraFereastra, nrLegaturi, legaturi, compSelectata.id, transformPunctConexiune);
+                        }
+                        else
+                            comp[compSelectata.id].transformari.rotate(-optiuni.unghiRotire);
                     }
                     else
-                        comp[compSelectata.id].transformari.rotate(-10);
-
+                        comp[compSelectata.id].transformari.rotate(-optiuni.unghiRotire);
                 }
-                else if (event.key.code == sf::Keyboard::M) {
+                else if (event.key.code == sf::Keyboard::Subtract) {
                     Transform transformPunctConexiune;
-                 //   transformPunctConexiune.setOrigin(comp[compSelectata.id].transformari.getTransform().transformPoint(elemente[comp[compSelectata.id].idElement].origine));
-                    transformPunctConexiune.scale(optiuni.coefScalare, optiuni.coefScalare, 
-                        comp[compSelectata.id].transformari.getTransform().transformPoint(elemente[comp[compSelectata.id].idElement].origine).x,
-                        comp[compSelectata.id].transformari.getTransform().transformPoint(elemente[comp[compSelectata.id].idElement].origine).y);
                     comp[compSelectata.id].transformari.scale(optiuni.coefScalare, optiuni.coefScalare);
-                    Vector2f coordonateInafaraFereastra = ieseDinFereastra(comp[compSelectata.id], elemente[comp[compSelectata.id].idElement]);
-                    if (coordonateInafaraFereastra.x == 0 && coordonateInafaraFereastra.y == 0)
+                    if (verificareColiziune(comp, compSelectata.id, nrComponenteInserate, elemente) == false)
                     {
-                        modificareConexiuni(coordonateInafaraFereastra, nrLegaturi, legaturi, compSelectata.id, transformPunctConexiune);
+                        transformPunctConexiune.scale(optiuni.coefScalare, optiuni.coefScalare,
+                            comp[compSelectata.id].transformari.getTransform().transformPoint(elemente[comp[compSelectata.id].idElement].origine).x,
+                            comp[compSelectata.id].transformari.getTransform().transformPoint(elemente[comp[compSelectata.id].idElement].origine).y);
+
+                        Vector2f coordonateInafaraFereastra = ieseDinFereastra(comp[compSelectata.id], elemente[comp[compSelectata.id].idElement]);
+                        if (coordonateInafaraFereastra.x == 0 && coordonateInafaraFereastra.y == 0)
+                        {
+                            modificareConexiuni(coordonateInafaraFereastra, nrLegaturi, legaturi, compSelectata.id, transformPunctConexiune);
+                        }
+                        else
+                            comp[compSelectata.id].transformari.scale(1 / optiuni.coefScalare, 1 / optiuni.coefScalare);
                     }
                     else
-                        comp[compSelectata.id].transformari.scale(1/ optiuni.coefScalare,1/ optiuni.coefScalare);
+                        comp[compSelectata.id].transformari.scale(1 / optiuni.coefScalare, 1 / optiuni.coefScalare);
+                    verificareColiziune(comp, compSelectata.id, nrComponenteInserate, elemente);
                 }
-                else if (event.key.code == sf::Keyboard::N)
+                else if (event.key.code == sf::Keyboard::Add)
                 {
                     Transform transformPunctConexiune;
                     transformPunctConexiune.scale(1/optiuni.coefScalare, 1/optiuni.coefScalare,
@@ -713,10 +735,8 @@ void afisareElemente()
                     }
                     else
                         comp[compSelectata.id].transformari.scale(optiuni.coefScalare, optiuni.coefScalare);
+                    verificareColiziune(comp, compSelectata.id, nrComponenteInserate, elemente);
                 }
-               
-
-
                 break;
 
             case sf::Event::MouseMoved:
@@ -758,17 +778,16 @@ void afisareElemente()
                     {
                         if (comp[i].activ)
                         {
+                          Vector2f pozitieVeche = comp[i].transformari.getPosition();
                             comp[i].transformari.setPosition((Vector2f)coordonateMouse);
-                            Vector2f coordonateInafaraFereastra = ieseDinFereastra(comp[compSelectata.id], elemente[comp[compSelectata.id].idElement]);
-                           /* Transformable transformPunctConexiune;
-                            transformPunctConexiune.setPosition((Vector2f)coordonateMouse);
-                            transformPunctConexiune.setOrigin(0, 0);
-                            modificareConexiuni(coordonateInafaraFereastra, nrLegaturi, legaturi, compSelectata.id, transformPunctConexiune);
-                           */
-                            comp[compSelectata.id].transformari.move(coordonateInafaraFereastra);
-
-                            for (int j = 0; j < nrLegaturi; j++)
+                            if (verificareColiziune(comp, compSelectata.id, nrComponenteInserate, elemente) == false)
                             {
+                                Vector2f coordonateInafaraFereastra = ieseDinFereastra(comp[compSelectata.id], elemente[comp[compSelectata.id].idElement]);
+
+                                comp[compSelectata.id].transformari.move(coordonateInafaraFereastra);
+
+                                for (int j = 0; j < nrLegaturi; j++)
+                                {
                                     if (legaturi[j].idComponenta1 == i)
                                     {
                                         Vector2f PunctTransfomrat = comp[i].transformari.getTransform().transformPoint(elemente[comp[i].idElement].legaturi[legaturi[j].nrPunctComponenta1]);
@@ -780,8 +799,12 @@ void afisareElemente()
                                         legaturi[j].punct2 = PunctTransfomrat;
                                     }
 
+                                }
                             }
-
+                            else
+                            {
+                                comp[i].transformari.setPosition(pozitieVeche);
+                            }
                         
                             break;
 
@@ -828,6 +851,9 @@ void afisareElemente()
                                    }
                                   nrComponenteInserate = 0;
                                    break;
+                               case 5: 
+                                   deschideFereastraAjutor();
+                                   break; //ajutor
                             default:
                                 break;
                             } 
@@ -840,8 +866,11 @@ void afisareElemente()
                             {
                                 status = InserareElement;
                                 comp[nrComponenteInserate].idElement = i;
+                                Transformable t;
+                                comp[nrComponenteInserate].transformari = t;
                                 comp[nrComponenteInserate].transformari.setOrigin(elemente[comp[nrComponenteInserate].idElement].origine.x, elemente[comp[nrComponenteInserate].idElement].origine.y);
                                 comp[nrComponenteInserate].transformari.setPosition(coordonateMouse.x, coordonateMouse.y);
+                                strcpy(comp[nrComponenteInserate].nume, "componenta");
                                 nrComponenteInserate++;
                             }
                     }
@@ -902,7 +931,7 @@ void afisareElemente()
                                 legaturi[nrLegaturi - 1].idComponenta2 = j;
                                 legaturi[nrLegaturi - 1].nrPunctComponenta2 = i;
                                 legaturi[nrLegaturi - 1].punct2 = PunctTransfomrat;
-                                conexiuneActiva = -1;
+                               // conexiuneActiva = -1;
                                 status = Normal;
 
                                 break;
@@ -916,14 +945,7 @@ void afisareElemente()
                     }
 
                 }
-              /*  else if (status == InserareElement && ieseDinFereastra(comp[nrComponenteInserate - 1], elemente[comp[compSelectata.id].idElement].dimensiuni) == 0)
-                {
-                    setareChenar(&comp[nrComponenteInserate - 1], elemente[comp[nrComponenteInserate - 1].idElement]);
-                    status = Normal;
-                }
-                else if (status == ModificarePozitieComponenta)
-                    status = Normal;*/
-
+           
                 break;
             }
 
@@ -980,8 +1002,6 @@ void afisareElemente()
              window.draw(elemente[comp[j].idElement].chenar, comp[j].transformari.getTransform());
             window.draw(elemente[comp[j].idElement].arc, comp[j].transformari.getTransform());
         }
-      
-    //    afisareStatus(&window, status);
         window.draw(text);
         window.display();
     }

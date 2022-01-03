@@ -75,5 +75,7 @@ struct Circuit
     Componenta componente[MAX];
     ElCircuit elemente[NUMAR_ELEMENTE];
     Legatura legaturi[MAX];
-    unsigned componentaSelectata = -1
+    int componentaSelectata = -1;
+    unsigned nrComponente = 0;
+    unsigned nrLegaturi =  0;
 };

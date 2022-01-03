@@ -25,18 +25,18 @@ VertexArray creareConexiuni(Legatura leg)
     return linii;
 }
 
-void modificareConexiuni(Vector2f coordonateInAfara, int nrLegaturi, Legatura* legaturi, int idComponenta, Transform TransformPunctConexiune)
+void modificareConexiuni(Vector2f coordonateInAfara, Circuit* circuit,  Transform TransformPunctConexiune)
 {
     TransformPunctConexiune.translate(coordonateInAfara.x, coordonateInAfara.y);
-    for (int i = 0; i < nrLegaturi; i++)
+    for (int i = 0; i < (*circuit).nrLegaturi; i++)
     {
-        if (legaturi[i].idComponenta1 == idComponenta)
+        if ((*circuit).legaturi[i].idComponenta1 == (*circuit).componentaSelectata)
         {
-            legaturi[i].punct1 = TransformPunctConexiune.transformPoint(legaturi[i].punct1);
+            (*circuit).legaturi[i].punct1 = TransformPunctConexiune.transformPoint((*circuit).legaturi[i].punct1);
         }
-        else if (legaturi[i].idComponenta2 == idComponenta)
+        else if ((*circuit).legaturi[i].idComponenta2 == (*circuit).componentaSelectata)
         {
-            legaturi[i].punct2 = TransformPunctConexiune.transformPoint(legaturi[i].punct2);
+            (*circuit).legaturi[i].punct2 = TransformPunctConexiune.transformPoint((*circuit).legaturi[i].punct2);
         }
     }
 }

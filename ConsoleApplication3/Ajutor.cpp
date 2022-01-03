@@ -2,7 +2,7 @@
 #include "Structuri.h"
 #include "Defineuri.h"
 #include <conio.h>
-char comenzi[NUMARAJUTORCOMENZI][55] = { "CTRL+O - Deschidere fisier",
+char comenzi[NUMAR_AJUTOR_COMENZI][55] = { "CTRL+O - Deschidere fisier",
 "CTRL+O - Salvare fisier",
 "E(pentru componenta selectata) - Editare parametri",
 "-(pentru componenta selectata) - Micsorare",
@@ -36,7 +36,7 @@ void deschideFereastraAjutor()
         }
         window.clear(sf::Color::White);
         window.draw(s);
-        for (int i = 0; i < NUMARAJUTORCOMENZI; i++)
+        for (int i = 0; i < NUMAR_AJUTOR_COMENZI; i++)
         {
             text.setString(comenzi[i]);
             window.draw(text);

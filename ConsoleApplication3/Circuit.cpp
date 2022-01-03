@@ -134,7 +134,7 @@ bool deschidereFereastra(Mod mod, char nume[])
         return true;
     return false;
 }
-void salvareCircuit(Componenta* comp, int nrComponente, Legatura* legaturi, int nrLegaturi, char numeFisier[])
+void salvareCircuit(Circuit* circuit, char numeFisier[])
 {
     if (numeFisier[0] != '\0' || deschidereFereastra(Salvare, numeFisier))
     {
@@ -142,10 +142,10 @@ void salvareCircuit(Componenta* comp, int nrComponente, Legatura* legaturi, int 
         FILE* f = fopen(numeFisier, "wb");
         if (f != NULL)
         {
-            fwrite(&nrComponente, sizeof(int), 1, f);
-            fwrite(comp, sizeof(Componenta), nrComponente, f);
-            fwrite(&nrLegaturi, sizeof(int), 1, f);
-            fwrite(legaturi, sizeof(Legatura), nrLegaturi, f);
+            fwrite(&(*circuit).nrComponente, sizeof(int), 1, f);
+            fwrite((*circuit).componente, sizeof(Componenta), (*circuit).nrComponente, f);
+            fwrite(&(*circuit).nrLegaturi, sizeof(int), 1, f);
+            fwrite((*circuit).legaturi, sizeof(Legatura), (*circuit).nrLegaturi, f);
             fclose(f);
             char mesaj[] = "Fiser salvat cu succes!";
             FereastraSucces(mesaj);
@@ -164,17 +164,17 @@ void salvareCircuit(Componenta* comp, int nrComponente, Legatura* legaturi, int 
     }
     
 }
-void deschidereCircuit(Componenta *comp, int* nrComponente, Legatura* legaturi, int* nrLegaturi, char numeFisier[])
+void deschidereCircuit(Circuit* circuit, char numeFisier[])
 {
     if (deschidereFereastra(Deschidere, numeFisier))
     {
         FILE* f = fopen(numeFisier, "rb");
         if (f != NULL)
         {
-            fread(nrComponente, sizeof(int), 1, f);
-            fread(comp, sizeof(Componenta), *nrComponente, f);
-            fread(nrLegaturi, sizeof(int), 1, f);
-            fread(legaturi, sizeof(Legatura), *nrLegaturi, f);
+            fread(&(*circuit).nrComponente, sizeof(unsigned int), 1, f);
+            fread((*circuit).componente, sizeof(Componenta), (*circuit).nrComponente, f);
+            fread(&(*circuit).nrLegaturi, sizeof(int), 1, f);
+            fread((*circuit).legaturi, sizeof(Legatura), (*circuit).nrLegaturi, f);
             fclose(f);
             char mesaj[] = "Fisier deschis cu succes!";
             FereastraSucces(mesaj);

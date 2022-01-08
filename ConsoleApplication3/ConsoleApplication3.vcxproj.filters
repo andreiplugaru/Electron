@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ConsoleApplication3.cpp">
+    <ClCompile Include="MediuLucru.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Conexiuni.cpp">
@@ -34,6 +34,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Ajutor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Stiva.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Slidere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Setari.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Start.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FereastraAvertizare.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -67,6 +82,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Ajutor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Stiva.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Slidere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Setari.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Start.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MediuLucru.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FereastraAvertizare.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -148,10 +148,15 @@
     <ClCompile Include="Ajutor.cpp" />
     <ClCompile Include="Circuit.cpp" />
     <ClCompile Include="Conexiuni.cpp" />
-    <ClCompile Include="ConsoleApplication3.cpp" />
+    <ClCompile Include="FereastraAvertizare.cpp" />
+    <ClCompile Include="MediuLucru.cpp" />
     <ClCompile Include="Meniu.cpp" />
     <ClCompile Include="Parametri.cpp" />
     <ClCompile Include="Parametri.h" />
+    <ClCompile Include="Setari.cpp" />
+    <ClCompile Include="Slidere.cpp" />
+    <ClCompile Include="Start.cpp" />
+    <ClCompile Include="Stiva.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\Downloads\STOP.PS" />
@@ -171,7 +176,13 @@
     <ClInclude Include="Circuit.h" />
     <ClInclude Include="Conexiuni.h" />
     <ClInclude Include="Defineuri.h" />
+    <ClInclude Include="FereastraAvertizare.h" />
+    <ClInclude Include="MediuLucru.h" />
     <ClInclude Include="Meniu.h" />
+    <ClInclude Include="Setari.h" />
+    <ClInclude Include="Slidere.h" />
+    <ClInclude Include="Start.h" />
+    <ClInclude Include="Stiva.h" />
     <ClInclude Include="Structuri.h" />
   </ItemGroup>
   <ItemGroup>

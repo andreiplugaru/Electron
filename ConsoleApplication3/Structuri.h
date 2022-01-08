@@ -14,15 +14,15 @@ struct Componenta
     bool areConexiuni[MAX] = { false };
     int conexiuneActiva;
     Vertex conexiuni[MAX];
-    VertexArray liniiPtConexiuni[MAX];
+  //  VertexArray liniiPtConexiuni[MAX];
     Transformable transformari;
-    char nume[MAXNUME] = { 0 };
+    char nume[MAX_NUME_COMPONENTA] = { 0 };
     unsigned rezistenta = 0;
     unsigned voltaj = 0;
     bool activ;
 };
 struct ElCircuit {
-    char denumire[30]; // dioada, baterie, polarizator...
+    char denumire[MAXNUME]; // dioada, baterie, polarizator...
     VertexArray linii;
     CircleShape elipsa;
     VertexArray arc;
@@ -37,7 +37,6 @@ struct ElCircuit {
 };
 struct Legatura
 {
-    VertexArray linii[MAX];
     Vector2f punct1;
     Vector2f punct2;
     unsigned int nrPunctComponenta1;
@@ -45,17 +44,16 @@ struct Legatura
     unsigned int idComponenta1;
     unsigned int idComponenta2;
 };
-struct ComponentaSelectata
-{
-    int id = -1;
-};
+
 enum Statusuri {
     DesenareLinie,
     Normal,
     InserareElement,
     InteractiuneComponenta,
     ModificarePozitieComponenta,
-    ModificareParametri
+    ModificareParametri,
+    ModificareCoeficientScalare,
+    ModificareUnghiRotire
 };
 
 struct PunctMinMax
@@ -65,17 +63,28 @@ struct PunctMinMax
 };
 struct Optiuni
 {
-    float latimeChenar;
     float coefScalare;
     int distantaMiscare;
     int unghiRotire;
+  //  unsigned int pasiUndoRedo;
+    Color culoareConexiuni;
+};
+struct Nod {
+    int data;
+    Nod* next;
 };
 struct Circuit 
 {
-    Componenta componente[MAX];
-    ElCircuit elemente[NUMAR_ELEMENTE];
-    Legatura legaturi[MAX];
+    Componenta *componente;
+    ElCircuit *elemente;
+    Legatura *legaturi;
+    Optiuni optiuni;
     int componentaSelectata = -1;
     unsigned nrComponente = 0;
     unsigned nrLegaturi =  0;
+    Nod* topUndo;
+    Nod* topRedo;
+    char numeFisier[MAX_LUNGIME_FISIER] = {};
+    bool esteSalvat = true;
 };
+//char numeOptiuniSalvate[NUMAR_OPTIUNI][40] = { "Coeficient scalare", "Distanta miscare", "Unghi rotire" };

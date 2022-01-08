@@ -3,7 +3,7 @@
 #pragma once
 
 using namespace sf;
-VertexArray creareConexiuni(Legatura leg);
+VertexArray creareConexiuni(Legatura leg, Color culoareLinii);
 
 void modificareConexiuni(Vector2f coordonateInAfara, Circuit* circuit, Transform TransformPunctConexiune);
 

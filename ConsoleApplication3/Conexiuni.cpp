@@ -2,11 +2,11 @@
 #include <SFML/Graphics.hpp>
 #include "Conexiuni.h"
 using namespace sf;
-VertexArray creareConexiuni(Legatura leg)
+VertexArray creareConexiuni(Legatura leg, Color culoareLinii)
 {
-    VertexArray linii(LinesStrip); // de schimbat cu linestrip
+    VertexArray linii(LinesStrip);
     Vertex punct;
-    punct.color = Color::Green;
+    punct.color = culoareLinii;
     float distanta = leg.punct2.x - leg.punct1.x;
     punct.position = leg.punct1;
     linii.append(punct);
@@ -28,15 +28,15 @@ VertexArray creareConexiuni(Legatura leg)
 void modificareConexiuni(Vector2f coordonateInAfara, Circuit* circuit,  Transform TransformPunctConexiune)
 {
     TransformPunctConexiune.translate(coordonateInAfara.x, coordonateInAfara.y);
-    for (int i = 0; i < (*circuit).nrLegaturi; i++)
+    for (int i = 0; i < circuit->nrLegaturi; i++)
     {
-        if ((*circuit).legaturi[i].idComponenta1 == (*circuit).componentaSelectata)
+        if (circuit->legaturi[i].idComponenta1 == circuit->componentaSelectata)
         {
-            (*circuit).legaturi[i].punct1 = TransformPunctConexiune.transformPoint((*circuit).legaturi[i].punct1);
+            circuit->legaturi[i].punct1 = TransformPunctConexiune.transformPoint(circuit->legaturi[i].punct1);
         }
-        else if ((*circuit).legaturi[i].idComponenta2 == (*circuit).componentaSelectata)
+        else if (circuit->legaturi[i].idComponenta2 == circuit->componentaSelectata)
         {
-            (*circuit).legaturi[i].punct2 = TransformPunctConexiune.transformPoint((*circuit).legaturi[i].punct2);
+            circuit->legaturi[i].punct2 = TransformPunctConexiune.transformPoint(circuit->legaturi[i].punct2);
         }
     }
 }

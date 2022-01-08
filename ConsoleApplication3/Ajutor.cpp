@@ -3,7 +3,7 @@
 #include "Defineuri.h"
 #include <conio.h>
 char comenzi[NUMAR_AJUTOR_COMENZI][55] = { "CTRL+O - Deschidere fisier",
-"CTRL+O - Salvare fisier",
+"CTRL+S - Salvare fisier",
 "E(pentru componenta selectata) - Editare parametri",
 "-(pentru componenta selectata) - Micsorare",
 "+(pentru componenta selectata) - Marire",
@@ -11,9 +11,11 @@ char comenzi[NUMAR_AJUTOR_COMENZI][55] = { "CTRL+O - Deschidere fisier",
 using namespace sf;
 void deschideFereastraAjutor()
 {
-    RenderWindow window(sf::VideoMode(740, 400, 32), "Ajutor", sf::Style::Close);
+    Image image;
+    image.loadFromFile("icons\\help.png");
+    RenderWindow window(sf::VideoMode(720,400, 32), "Ajutor", sf::Style::Close);
     window.setFramerateLimit(30);
- //   ErrWindow.setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());
+    window.setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());
    
     Texture t;
     t.loadFromFile("background.jpg");
@@ -42,8 +44,6 @@ void deschideFereastraAjutor()
             window.draw(text);
             text.move(0, text.getLocalBounds().height + OFFSET);
         }
-        
-    
         window.display();
     }
 }

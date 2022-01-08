@@ -1,0 +1,6 @@
+Mai am de rezolvat bugul la sliderul de resize
+Si de facut la unghi rotire
+Trebuie sa imi explici faza cu pointeri, aproape ai rescris tot programul pentru ei:)))
+Good job!
+Fac cu liniile si mai vad eu
+Succes!

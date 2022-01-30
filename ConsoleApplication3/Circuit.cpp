@@ -1,3 +1,4 @@
+#pragma once
 #define _CRT_SECURE_NO_WARNINGS
 #include "Structuri.h"
 #include "Defineuri.h"
@@ -22,15 +23,14 @@ void FereastraEroare(char mesajEroare[])
     ErrWindow.setFramerateLimit(30);
     ErrWindow.setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());
 
-    sf::String ErrMessage;
-    bool running = true;
-    
-  
-    while (ErrWindow.isOpen()) {
+    while (ErrWindow.isOpen())
+    {
         sf::Event event;
 
-        while (ErrWindow.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
+        while (ErrWindow.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
                 ErrWindow.close();
             }
            
@@ -56,16 +56,15 @@ void FereastraSucces(char mesajSucces[])
     sf::RenderWindow ErrWindow(sf::VideoMode(t.getLocalBounds().width + 10, t.getLocalBounds().height + 10, 32), "Succes!", sf::Style::Close);
     ErrWindow.setFramerateLimit(30);
     ErrWindow.setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());
-
-    sf::String ErrMessage;
-    bool running = true;
-
-
-    while (ErrWindow.isOpen()) {
+  
+    while (ErrWindow.isOpen())
+    {
         sf::Event event;
 
-        while (ErrWindow.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
+        while (ErrWindow.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
                 ErrWindow.close();
             }
 
@@ -76,7 +75,6 @@ void FereastraSucces(char mesajSucces[])
         ErrWindow.display();
     }
 }
-
 bool deschidereFereastra(Mod mod, char nume[])
 {
     sf::Font font;
@@ -86,7 +84,6 @@ bool deschidereFereastra(Mod mod, char nume[])
     t.setFillColor(sf::Color::White);
     t.setFont(font);
     char init = '_';
-   // char nume[MAXNUME];
     nume[0] = init;
     nume[1] = '\0';
     int i = 0;
@@ -97,14 +94,18 @@ bool deschidereFereastra(Mod mod, char nume[])
     window.setFramerateLimit(30);
     window.setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());
    
-    while (window.isOpen()) {
+    while (window.isOpen())
+    {
         sf::Event event;
 
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
                 window.close();
             }
-            if (event.type == sf::Event::TextEntered) {
+            if (event.type == sf::Event::TextEntered)
+            {
                 if (sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace))
                 {
                     if (i > 0)
@@ -137,8 +138,10 @@ bool deschidereFereastra(Mod mod, char nume[])
         window.display();
     }
     
-    if(i > 0)
+    if (i > 0)
+    {
         return true;
+    }
     return false;
 }
 void salvareCircuit(Circuit* circuit, char adresaFisier[], bool afisareMesaj)
@@ -158,6 +161,7 @@ void salvareCircuit(Circuit* circuit, char adresaFisier[], bool afisareMesaj)
             fwrite(circuit->componente, sizeof(Componenta), circuit->nrComponente, f);
             fwrite(&circuit->nrLegaturi, sizeof(unsigned int), 1, f);
             fwrite(circuit->legaturi, sizeof(Legatura), circuit->nrLegaturi, f);
+            fwrite(&circuit->sizeCoef, sizeof(float), 1, f);
             fclose(f);
             if (afisareMesaj)
             {
@@ -191,6 +195,8 @@ bool deschidereCircuit(Circuit* circuit, char adresaFisier[], bool afisareMesaj)
         fread(circuit->componente, sizeof(Componenta), circuit->nrComponente, f);
         fread(&circuit->nrLegaturi, sizeof(unsigned int), 1, f);
         fread(circuit->legaturi, sizeof(Legatura), circuit->nrLegaturi, f);
+        fread(&circuit->sizeCoef, sizeof(float), 1, f);
+        
         fclose(f);
 
         if (afisareMesaj)
@@ -209,7 +215,6 @@ bool deschidereCircuit(Circuit* circuit, char adresaFisier[], bool afisareMesaj)
     }
     
 }
-
 void salvareIstoricRedo(Circuit* circuit)
 {
     if (circuit->topUndo->data != 1 && circuit->topUndo->data != 0 && circuit->topRedo != circuit->topUndo)
@@ -233,6 +238,7 @@ void deschidereIstoricRedo(Circuit* circuit)
         strcat(nume, ".bin");
         deschidereCircuit(circuit, nume, false);
         pop(circuit->topRedo);
+        circuit->componentaSelectata = -1;
     }
 }
 int max(int n1, int n2)
@@ -241,16 +247,16 @@ int max(int n1, int n2)
 }
 void salvareIstoric(Circuit* circuit)
 {
-        char numarFisier[MAX_NUMAR_STIVA];
-        char nume[MAXNUME] = "istoric\\temp";
-        int nr1 = maxStiva(circuit->topUndo);
-        int nr2 = maxStiva(circuit->topRedo);
-        _itoa(max(nr1, nr2) + 1, numarFisier, 10);
-        strcat(nume, numarFisier);
-        strcat(nume, ".bin");
-        salvareCircuit(circuit, nume, false);
-        push(circuit->topUndo, max(nr1, nr2) + 1);
-        circuit->esteSalvat = false;
+    char numarFisier[MAX_NUMAR_STIVA];
+    char nume[MAXNUME] = "istoric\\temp";
+    int nr1 = maxStiva(circuit->topUndo);
+    int nr2 = maxStiva(circuit->topRedo);
+    _itoa(max(nr1, nr2) + 1, numarFisier, 10);
+    strcat(nume, numarFisier);
+    strcat(nume, ".bin");
+    salvareCircuit(circuit, nume, false);
+    push(circuit->topUndo, max(nr1, nr2) + 1);
+    circuit->esteSalvat = false;
 }
 void exporta(RenderWindow &window)
 {
@@ -267,7 +273,7 @@ void exporta(RenderWindow &window)
         strcat(adresaCompleta, numeFisier);
         if (texture.copyToImage().saveToFile(adresaCompleta))
         {
-            char mesaj[] = "Fiser exportat cu succes!";
+            char mesaj[] = "Fisier exportat cu succes!";
             FereastraSucces(mesaj);
         }
         else
@@ -290,13 +296,11 @@ void deschidereIstoric(Circuit* circuit)
         char nume[MAXNUME] = "istoric\\temp";
         pop(circuit->topUndo);
         _itoa(prim(circuit->topUndo), numarFisier, 10);
-       
         strcat(nume, numarFisier);
         strcat(nume, ".bin");
-        deschidereCircuit(circuit, nume, false);
-       
-    }
-  
+        deschidereCircuit(circuit, nume, false);   
+        circuit->componentaSelectata = -1;
+    } 
 }
 void stergereIstoric(Circuit* circuit)
 {
@@ -304,27 +308,20 @@ void stergereIstoric(Circuit* circuit)
     {
         char numarFisier[MAX_NUMAR_STIVA];
         char nume[MAXNUME] = "istoric\\temp";
-       // circuit->topUndo = circuit->topUndo->next;
         pop(circuit->topUndo);
         _itoa(prim(circuit->topUndo), numarFisier, 10);
-
         strcat(nume, numarFisier);
         strcat(nume, ".bin");
-        remove(nume);
-      
-       
+        remove(nume);     
     }
     while (circuit->topRedo != NULL)
     {
         char numarFisier[MAX_NUMAR_STIVA];
         char nume[MAXNUME] = "istoric\\temp";
-      
         _itoa(prim(circuit->topRedo), numarFisier, 10);
-
         strcat(nume, numarFisier);
         strcat(nume, ".bin");
         remove(nume);
         pop(circuit->topRedo);
-     //   circuit->topRedo = circuit->topRedo->next;
     }
 }

@@ -1,3 +1,4 @@
+#pragma once
 #include <SFML/Graphics.hpp>
 #include "Defineuri.h"
 #include "Structuri.h"
@@ -6,12 +7,13 @@
 #include "Ajutor.h"
 using namespace sf;
 using namespace std;
+
 char textButoane[NR_BUTOANE_START][30] = { "Deschidere Circuit",
 "Circuit Nou",
 "Ajutor",
 "Iesire",
  };
-using namespace sf;
+
 bool verificareInteriorButon(RectangleShape patrat, Vector2i coordonateMouse)
 {
     return (coordonateMouse.x >= patrat.getGlobalBounds().left && coordonateMouse.x <= patrat.getGlobalBounds().left + patrat.getGlobalBounds().width
@@ -19,6 +21,8 @@ bool verificareInteriorButon(RectangleShape patrat, Vector2i coordonateMouse)
 }
 void afisareFereastraStart()
 {
+    Image image;
+    image.loadFromFile("icons\\Electron.png");
 	Texture t;
 	t.loadFromFile("background.png");
     Vector2f marimeButon;
@@ -30,7 +34,8 @@ void afisareFereastraStart()
     s.setScale(
         targetSize.x / s.getLocalBounds().width,
         targetSize.y / s.getLocalBounds().height);
-	RenderWindow window(VideoMode(1920, 1080), "ELECTRON", Style::Fullscreen);
+	RenderWindow window(VideoMode(1920, 1080), "Electron", Style::Titlebar);
+    window.setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());
     window.setFramerateLimit(60);
     RectangleShape butonDeschidereCircuit;
     butonDeschidereCircuit.setSize(marimeButon);
@@ -65,7 +70,6 @@ void afisareFereastraStart()
  
     while (window.isOpen()) {
         sf::Event event;
-       // text.setPosition(OFFSET, OFFSET);
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) 
             {

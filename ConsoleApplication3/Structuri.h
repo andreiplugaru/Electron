@@ -10,30 +10,29 @@ struct Punct
 };
 struct Componenta
 {
-    int idElement;
-    bool areConexiuni[MAX] = { false };
-    int conexiuneActiva;
     Vertex conexiuni[MAX];
-  //  VertexArray liniiPtConexiuni[MAX];
     Transformable transformari;
     char nume[MAX_NUME_COMPONENTA] = { 0 };
+    bool areConexiuni[MAX] = { false };
+    int idElement;
     unsigned rezistenta = 0;
     unsigned voltaj = 0;
     bool activ;
 };
 struct ElCircuit {
-    char denumire[MAXNUME]; // dioada, baterie, polarizator...
     VertexArray linii;
     CircleShape elipsa;
     VertexArray arc;
     RectangleShape dreptunghi;
     Vector2f origine;
     RectangleShape chenar;
-    unsigned nrLegaturi;
-    unsigned nrLinii;
     Vector2f dimensiuni;
     Vector2f legaturi[MAX];
+    char denumire[MAXNUME]; 
     float sizeCoef = 50;
+    unsigned nrLegaturi;
+    unsigned nrLinii;
+   
 };
 struct Legatura
 {
@@ -46,10 +45,9 @@ struct Legatura
 };
 
 enum Statusuri {
-    DesenareLinie,
+    CreareConexiune,
     Normal,
     InserareElement,
-    InteractiuneComponenta,
     ModificarePozitieComponenta,
     ModificareParametri,
     ModificareCoeficientScalare,
@@ -66,7 +64,6 @@ struct Optiuni
     float coefScalare;
     int distantaMiscare;
     int unghiRotire;
-  //  unsigned int pasiUndoRedo;
     Color culoareConexiuni;
 };
 struct Nod {
@@ -79,12 +76,14 @@ struct Circuit
     ElCircuit *elemente;
     Legatura *legaturi;
     Optiuni optiuni;
+    Nod* topUndo;
+    Nod* topRedo;
     int componentaSelectata = -1;
     unsigned nrComponente = 0;
     unsigned nrLegaturi =  0;
-    Nod* topUndo;
-    Nod* topRedo;
+    float latimeCasuta;
+    float sizeCoef = 1;
     char numeFisier[MAX_LUNGIME_FISIER] = {};
     bool esteSalvat = true;
+    Statusuri status = Normal;
 };
-//char numeOptiuniSalvate[NUMAR_OPTIUNI][40] = { "Coeficient scalare", "Distanta miscare", "Unghi rotire" };

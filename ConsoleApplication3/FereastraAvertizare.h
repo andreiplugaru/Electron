@@ -1,2 +1,2 @@
 #pragma once
-bool afisareFereastraAvertizare();
+bool afisareFereastraAvertizare(char mesaj[]);

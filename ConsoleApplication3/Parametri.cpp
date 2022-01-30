@@ -1,11 +1,17 @@
+#pragma once
 #define _CRT_SECURE_NO_WARNINGS
 #include "Structuri.h"
 #include <iostream>
 #include <charconv>
+#include <string.h>
 
 
-enum StatusuriLocale {
-	NicioModificare, ModificareNume, ModificareRezistenta, ModificareVoltaj
+enum StatusuriLocale
+{
+	NicioModificare, 
+	ModificareNume, 
+	ModificareRezistenta,
+	ModificareVoltaj
 };
 bool esteCaracter(char c)
 {
@@ -20,6 +26,31 @@ bool salvareDate(Componenta* componenta, char rezistenta[], char voltaj[])
 	(*componenta).rezistenta = atoi(rezistenta);
 	(*componenta).voltaj = atoi(voltaj);
 	return true;
+}
+void shrek()
+{
+	Color gri(32, 32, 32);
+	sf::ContextSettings settings;
+	settings.antialiasingLevel = 8.0;
+	RenderWindow window(VideoMode(800, 450), "Shrek", Style::Close, settings);
+	window.setFramerateLimit(60);
+	Texture image;
+	image.loadFromFile("shrek.jpg");
+	Sprite s(image);
+	while (window.isOpen())
+	{
+		Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+			{
+				window.close();
+			}
+		}
+		window.clear(sf::Color::White);
+		window.draw(s);
+		window.display();
+	}	
 }
 void afisareFereastraParametri(Componenta* componenta)
 {
@@ -37,23 +68,17 @@ void afisareFereastraParametri(Componenta* componenta)
 	StatusuriLocale status = NicioModificare;
 
 	Vector2f dimButon, dimTextBox;
-	//std::string s = std::to_string((*componenta).rezistenta);
 	char rezistenta[MAXNUMAR] = "0", voltaj[MAXNUMAR] = "0";
-	_itoa((*componenta).rezistenta, rezistenta, 10);
-	_itoa((*componenta).voltaj, voltaj, 10);
-
+	_itoa(componenta->rezistenta, rezistenta, 10);
+	_itoa(componenta->voltaj, voltaj, 10);
 
 	unsigned inaltimeFereastra = 200;
-	//t.setString("123456789012345678901234567890");
 	int test = t.getGlobalBounds().width;
 	unsigned latimeMaxCasetaText = t.getGlobalBounds().width * MAX_NUME_COMPONENTA  / 3 + 2 * OFFSET;
 	unsigned latimeFereastra = latimeMaxCasetaText + latimeMaxNumeCamp + 2 * OFFSET;
 	sf::RenderWindow window(sf::VideoMode(latimeFereastra, inaltimeFereastra, 32), "Parametri", sf::Style::Close);
 	window.setFramerateLimit(30);
 	window.setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());
-
-	sf::String ErrMessage;
-	bool running = true;
 
 	int inaltimeCastaText = t.getLocalBounds().height;
 	RectangleShape butonSalvare;
@@ -71,10 +96,12 @@ void afisareFereastraParametri(Componenta* componenta)
 	textBox.setSize(dimTextBox);
 	char init = '_';
 
-	while (window.isOpen()) {
+	while (window.isOpen()) 
+	{
 		sf::Event event;
 		Transformable transformable, transformableValoare;
-		while (window.pollEvent(event)) {
+		while (window.pollEvent(event)) 
+		{
 			if (event.type == sf::Event::Closed)
 			{
 				window.close();
@@ -88,7 +115,9 @@ void afisareFereastraParametri(Componenta* componenta)
 					butonSalvare.setOutlineColor(Color::Blue);
 				}
 				else
+				{
 					butonSalvare.setOutlineColor(Color::White);
+				}
 			}
 			else if (event.type == sf::Event::MouseButtonPressed)
 			{
@@ -97,13 +126,25 @@ void afisareFereastraParametri(Componenta* componenta)
 					&& coordonateMouse.y >= butonSalvare.getGlobalBounds().top && coordonateMouse.y <= butonSalvare.getGlobalBounds().top + butonSalvare.getGlobalBounds().height)
 				{
 					if (status == ModificareVoltaj)
+					{
 						voltaj[strlen(voltaj) - 1] = '\0';
+					}
 					else if (status == ModificareRezistenta)
+					{
 						rezistenta[strlen(rezistenta) - 1] = '\0';
+					}
 					else if (status == ModificareNume)
-						(*componenta).nume[strlen((*componenta).nume) - 1] = '\0';
+					{
+						componenta->nume[strlen(componenta->nume) - 1] = '\0';
+					}
 					if (salvareDate(componenta, rezistenta, voltaj) == true)
+					{
+						if (_stricmp(componenta->nume, "shrek") == 0)
+						{
+							shrek();
+						}
 						window.close();
+					}
 				}
 				else if (coordonateMouse.x >= latimeMaxNumeCamp + OFFSET && coordonateMouse.x < latimeFereastra)
 				{
@@ -119,20 +160,22 @@ void afisareFereastraParametri(Componenta* componenta)
 
 							if (status != ModificareNume)
 							{
-								unsigned lungime = strlen((*componenta).nume);
-								(*componenta).nume[lungime] = init;
-								(*componenta).nume[lungime + 1] = '\0';
+								unsigned lungime = strlen(componenta->nume);
+								componenta->nume[lungime] = init;
+								componenta->nume[lungime + 1] = '\0';
 							}
 							status = ModificareNume;
 						}
 						else if (coordonateMouse.y < inaltimeCastaText * 2 + 2 * OFFSET) //caseta rezistenta
 						{
 							if (status == ModificareNume)
-								(*componenta).nume[strlen((*componenta).nume) - 1] = '\0';
-
+							{
+								componenta->nume[strlen(componenta->nume) - 1] = '\0';
+							}
 							if (status == ModificareVoltaj)
+							{
 								voltaj[strlen(voltaj) - 1] = '\0';
-
+							}
 							if (status != ModificareRezistenta)
 							{
 								unsigned lungime = strlen(rezistenta);
@@ -144,11 +187,13 @@ void afisareFereastraParametri(Componenta* componenta)
 						else if (coordonateMouse.y < inaltimeCastaText * 3 + 3 * OFFSET) //caseta voltaj
 						{
 							if (status == ModificareNume)
-								(*componenta).nume[strlen((*componenta).nume) - 1] = '\0';
-
+							{
+								componenta->nume[strlen(componenta->nume) - 1] = '\0';
+							}
 							if (status == ModificareRezistenta)
+							{
 								rezistenta[strlen(rezistenta) - 1] = '\0';
-
+							}
 							if (status != ModificareVoltaj)
 							{
 								unsigned lungime = strlen(voltaj);
@@ -160,11 +205,17 @@ void afisareFereastraParametri(Componenta* componenta)
 						else
 						{
 							if (status == ModificareVoltaj)
+							{
 								voltaj[strlen(voltaj) - 1] = '\0';
+							}
 							else if (status == ModificareRezistenta)
+							{
 								rezistenta[strlen(rezistenta) - 1] = '\0';
+							}
 							else if (status == ModificareNume)
-								(*componenta).nume[strlen((*componenta).nume) - 1] = '\0';
+							{
+								componenta->nume[strlen(componenta->nume) - 1] = '\0';
+							}
 							status = NicioModificare;
 						}
 					}
@@ -172,11 +223,17 @@ void afisareFereastraParametri(Componenta* componenta)
 				else
 				{
 					if (status == ModificareVoltaj)
+					{
 						voltaj[strlen(voltaj) - 1] = '\0';
+					}
 					else if (status == ModificareRezistenta)
+					{
 						rezistenta[strlen(rezistenta) - 1] = '\0';
+					}
 					else if (status == ModificareNume)
-						(*componenta).nume[strlen((*componenta).nume) - 1] = '\0';
+					{
+						componenta->nume[strlen(componenta->nume) - 1] = '\0';
+					}
 					status = NicioModificare;
 				}
 
@@ -185,18 +242,18 @@ void afisareFereastraParametri(Componenta* componenta)
 			{
 				if (status == ModificareNume)
 				{
-					unsigned lungimeNume = strlen((*componenta).nume);
+					unsigned lungimeNume = strlen(componenta->nume);
 					if (sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace) && lungimeNume > 1)
 					{
-						(*componenta).nume[lungimeNume - 2] = init;
-						(*componenta).nume[lungimeNume - 1] = '\0';
+						componenta->nume[lungimeNume - 2] = init;
+						componenta->nume[lungimeNume - 1] = '\0';
 					}
 					else if (lungimeNume < MAX_NUME_COMPONENTA && esteCaracter(event.key.code))
 					{
 						char c = (char)(event.key.code);
-						(*componenta).nume[lungimeNume - 1] = c;
-						(*componenta).nume[lungimeNume] = init;
-						(*componenta).nume[lungimeNume + 1] = '\0';
+						componenta->nume[lungimeNume - 1] = c;
+						componenta->nume[lungimeNume] = init;
+						componenta->nume[lungimeNume + 1] = '\0';
 					}
 				}
 				else if (status == ModificareRezistenta)
@@ -242,7 +299,7 @@ void afisareFereastraParametri(Componenta* componenta)
 		t.setString("Nume");
 
 		window.draw(t, transformable.getTransform());
-		t.setString((*componenta).nume);
+		t.setString(componenta->nume);
 		transformableValoare.move(latimeMaxNumeCamp + OFFSET, OFFSET / 5);
 		textBox.move(latimeMaxNumeCamp + OFFSET, OFFSET / 2);
 		window.draw(textBox);

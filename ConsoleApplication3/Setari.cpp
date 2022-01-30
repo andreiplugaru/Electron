@@ -1,3 +1,4 @@
+#pragma once
 #define _CRT_SECURE_NO_WARNINGS
 #include "Structuri.h"
 
@@ -20,18 +21,16 @@ void FereastraEroareSetari(char mesajEroare[])
 	ErrWindow.setFramerateLimit(30);
 	ErrWindow.setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());
 
-	sf::String ErrMessage;
-	bool running = true;
-
-
-	while (ErrWindow.isOpen()) {
+	while (ErrWindow.isOpen())
+	{
 		sf::Event event;
 
-		while (ErrWindow.pollEvent(event)) {
-			if (event.type == sf::Event::Closed) {
+		while (ErrWindow.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed) 
+			{
 				ErrWindow.close();
 			}
-
 		}
 
 		ErrWindow.clear(sf::Color::Black);
@@ -68,7 +67,6 @@ void salvareJSON(Optiuni optiuni, char numeOptiuniSalvate[][40])
 	fprintf(f, "}");
 	fclose(f);
 }
-
 bool salvareDate(Circuit* circuit, Optiuni optiuni, char numeOptiuniSalvate[][40])
 {
 	if (optiuni.coefScalare >= MAX_COEF_SCALARE)
@@ -100,8 +98,6 @@ bool salvareDate(Circuit* circuit, Optiuni optiuni, char numeOptiuniSalvate[][40
 	}
 	salvareJSON(optiuni, numeOptiuniSalvate);
 	circuit->optiuni = optiuni;
-	//(*componenta).rezistenta = atoi(rezistenta);
-	//(*componenta).voltaj = atoi(voltaj);
 	return true;
 }
 void floatToCharArr(float valoare, char rezultat[])
@@ -129,8 +125,7 @@ void afisareFereastraSetari(Circuit* circuit, char numeOptiuniSalvate[][40])
 	t.setString("Rgp");
 
 	StatusuriLocale status = NicioModificare;
-	//circuit->
-	
+
 	Vector2f dimButon, dimTextBox;
 	char coefScalare[MAXNUMAR] =  "0", distantaMiscare[MAXNUMAR] = "0", unghiRotire[MAXNUMAR] = "0";
 	floatToCharArr(circuit->optiuni.coefScalare, coefScalare);
@@ -139,16 +134,12 @@ void afisareFereastraSetari(Circuit* circuit, char numeOptiuniSalvate[][40])
 
 
 	unsigned inaltimeFereastra = 250;
-	//t.setString("123456789012345678901234567890");
 	int test = t.getGlobalBounds().width;
 	unsigned latimeMaxCasetaText = t.getGlobalBounds().width * MAXNUMAR / 3 + 2 * OFFSET;
 	unsigned latimeFereastra = 250 + latimeMaxNumeCamp + 2 * OFFSET;
 	sf::RenderWindow window(sf::VideoMode(latimeFereastra, inaltimeFereastra, 32), "Setari", sf::Style::Close);
 	window.setFramerateLimit(30);
 	window.setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());
-
-	sf::String ErrMessage;
-	bool running = true;
 
 	int inaltimeCastaText = t.getLocalBounds().height;
 	RectangleShape butonSalvare;
@@ -290,7 +281,6 @@ void afisareFereastraSetari(Circuit* circuit, char numeOptiuniSalvate[][40])
 						}
 						else
 						{
-
 							if (status == ModificareCoefScalare)
 								coefScalare[strlen(coefScalare) - 1] = '\0';
 							else if (status == ModificareDistantaMiscare)
@@ -303,7 +293,6 @@ void afisareFereastraSetari(Circuit* circuit, char numeOptiuniSalvate[][40])
 				}
 				else
 				{
-
 					if (status == ModificareCoefScalare)
 						coefScalare[strlen(coefScalare) - 1] = '\0';
 					else if (status == ModificareDistantaMiscare)
@@ -328,8 +317,7 @@ void afisareFereastraSetari(Circuit* circuit, char numeOptiuniSalvate[][40])
 					{
 						char c = (char)(event.key.code);
 						if (esteCifraSetari(event.key.code) ||  (c == '.' && strchr(coefScalare, c) == NULL))
-						{
-							
+						{						
 							coefScalare[lungimeCoefScalare - 1] = c;
 							coefScalare[lungimeCoefScalare] = init;
 							coefScalare[lungimeCoefScalare + 1] = '\0';
@@ -445,6 +433,5 @@ void afisareFereastraSetari(Circuit* circuit, char numeOptiuniSalvate[][40])
 		window.draw(t, transformable.getTransform());
 
 		window.display();
-
 	}
 }

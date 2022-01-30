@@ -26,8 +26,7 @@ void drawCoefScalareBara(RenderWindow& window)
     linie.append(punct2);
 
     sf::Font font;
-    if (!font.loadFromFile("fonts\\RobotoSlab-Font.ttf"))
-        std::cout << "ERROR";
+    font.loadFromFile("fonts\\RobotoSlab-Font.ttf");
     sf::Text text;
     text.setString("Marime");
     text.setFont(font);
@@ -64,8 +63,7 @@ void drawUnghiRotireBara(RenderWindow& window)
     linie.append(punct2);
 
     sf::Font font;
-    if (!font.loadFromFile("fonts\\RobotoSlab-Font.ttf"))
-        std::cout << "ERROR";
+    font.loadFromFile("fonts\\RobotoSlab-Font.ttf");
     sf::Text text;
     text.setString("Rotatie");
     text.setFont(font);
@@ -82,29 +80,21 @@ void drawUnghiRotireBara(RenderWindow& window)
     unghi360.setCharacterSize(20);
     unghi360.setPosition(axaOxSlidere - 20, bazaUnghiRotire + 5);
 
-    /*CircleShape slider;
-    slider.setRadius(10);
-    slider.setOrigin(slider.getRadius(), slider.getRadius());
-    slider.setPosition(axaOxSlidere - 0.5, pozitieCerc);
-    slider.setFillColor(sf::Color::White);*/
-
     window.draw(linie);
     window.draw(text);
     window.draw(unghi0);
     window.draw(unghi360);
-    //window.draw(slider);
 }
 float valoareUnghiRotire(Vector2i coordMouse)
 {
     float valoareUnghiRotire = 0;
-    valoareUnghiRotire = (coordMouse.x - varfUnghiRotire) * 1.8;
+    valoareUnghiRotire = (coordMouse.y - varfUnghiRotire) * 1.8;
     return valoareUnghiRotire;
 }
 float valoareCoefScalare(Vector2i coordMouse)
 {
     float coefScalare = 0;
     coefScalare = (0.3 * coordMouse.y) / 40 - 4.3;
-   // coefScalare = varfCoefScalare - 
     return coefScalare;
 }
 float pozitieCercCoefScalare(float coefScalare)

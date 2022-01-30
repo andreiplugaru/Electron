@@ -1,4 +1,4 @@
-
+#pragma once
 #include "Structuri.h"
 #include "Defineuri.h"
 bool verificareInteriorButonAvertizare(RectangleShape patrat, Vector2i coordonateMouse)
@@ -6,7 +6,7 @@ bool verificareInteriorButonAvertizare(RectangleShape patrat, Vector2i coordonat
     return (coordonateMouse.x >= patrat.getGlobalBounds().left && coordonateMouse.x <= patrat.getGlobalBounds().left + patrat.getGlobalBounds().width
         && coordonateMouse.y >= patrat.getGlobalBounds().top && coordonateMouse.y <= patrat.getGlobalBounds().top + patrat.getGlobalBounds().height);
 }
-bool afisareFereastraAvertizare()
+bool afisareFereastraAvertizare(char mesaj[])
 {
     sf::Font font;
     font.loadFromFile("fonts\\RobotoSlab-Font.ttf");
@@ -31,7 +31,7 @@ bool afisareFereastraAvertizare()
     text.setFillColor(sf::Color::White);
     text.setCharacterSize(25);
     text.setFont(font);
-    text.setString("Circuitul nu e salvat. Sigur vrei sa parasesti mediul de lucru?");
+    text.setString(mesaj);
     Vector2f pozitieButon;
     pozitieButon.y = text.getGlobalBounds().height + 2 * OFFSET;
     pozitieButon.x = OFFSET;
@@ -49,13 +49,13 @@ bool afisareFereastraAvertizare()
     butonNu.setOutlineColor(Color::White);
     butonNu.setOutlineThickness(3);
 
-  //  pozitieButon.x = butonDa.getSize().x + OFFSET;
- 
     while (window.isOpen()) {
         sf::Event event;
         text.setPosition(OFFSET, OFFSET);
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
+        while (window.pollEvent(event)) 
+        {
+            if (event.type == sf::Event::Closed) 
+            {
                 window.close();
             }
             else if (event.type == sf::Event::MouseMoved)
@@ -96,7 +96,6 @@ bool afisareFereastraAvertizare()
         Vector2f pozitieButon;
         Vector2f pozitieText;
         valoareButon.setString("Da");
-     //   text.setString("Da");
         window.draw(text);
         pozitieButon.x = OFFSET;
         pozitieButon.y = text.getGlobalBounds().top + text.getGlobalBounds().height + OFFSET;
